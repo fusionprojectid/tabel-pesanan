@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rekapitulasi Pesanan Kaos "Tritunggal Lancar"</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        /* Custom styles untuk input agar menyatu dengan tabel */
+        input[type="text"] {
+            background-color: transparent;
+            border: none;
+            text-align: center;
+            width: 100%;
+            height: 100%;
+            padding: 0.75rem 0.5rem; /* Increased padding */
+            box-sizing: border-box;
+            font-size: 0.875rem; /* 14px */
+            transition: background-color 0.2s ease-in-out;
+        }
+        .data-input:hover {
+            background-color: #f0f9ff; /* Light blue on hover */
+        }
+        input[type="text"]:focus {
+            outline: 2px solid #2563eb; 
+            background-color: #e0f2fe;
+            border-radius: 4px;
+        }
+        /* Style untuk sel yang tidak bisa di-edit */
+        .readonly-cell {
+            font-weight: 600; /* Semibold */
+            background-color: #f3f4f6;
+            color: #1f2937;
+        }
+        th {
+            padding: 10px 8px;
+            vertical-align: middle;
+            font-weight: 600;
+        }
+        .size-header {
+            font-weight: 700;
+            background-color: #f9fafb;
+            vertical-align: middle;
+            font-size: 0.9rem;
+        }
+        /* Gradient header colors */
+        .header-main { background-color: #4a5568; }
+        .header-linmas { background-color: #0891b2; }
+        .header-rw { background-color: #3b82f6; }
+        .header-pkk { background-color: #16a34a; }
+        .header-posyandu { background-color: #f59e0b; }
+        .header-bkm { background-color: #8b5cf6; }
+        .header-keltan { background-color: #a78bfa; }
+        .header-kaderlin { background-color: #c4b5fd; }
+        .header-lpmk { background-color: #f97316; }
+        .header-kim { background-color: #fb923c; }
+        .header-kelsi { background-color: #14b8a6; }
+        .header-pokja { background-color: #6366f1; }
+        .header-katar { background-color: #818cf8; }
+        .header-kelurahan { background-color: #a5b4fc; }
+        .header-total { background-color: #374151; }
+
+        .header-rw-sub { background-color: #60a5fa; }
+        .header-ukuran-sub { background-color: #6b7280; }
+        kbd {
+            padding: 0.25rem 0.5rem;
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: #374151;
+            background-color: #f3f4f6;
+            border: 1px solid #d1d5db;
+            border-radius: 0.25rem;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 p-4 sm:p-6 md:p-8">
+    <div class="max-w-full mx-auto bg-white p-6 rounded-xl shadow-lg">
+        <div class="flex flex-col sm:flex-row justify-between items-center gap-4 mb-8">
+            <div class="text-center sm:text-left">
+                <h1 class="text-2xl sm:text-3xl font-bold text-gray-800">Rekapitulasi Pesanan Kaos</h1>
+                <p class="text-md sm:text-lg text-gray-500">"Tritunggal Lancar"</p>
+            </div>
+            <div>
+                <button id="clear-data-btn" class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-lg flex items-center transition-colors duration-200">
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                    Kosongkan Data
+                </button>
+            </div>
+        </div>
+        
+        <div class="overflow-x-auto rounded-lg shadow-md border border-gray-200">
+            <table id="interactive-table" class="w-full border-collapse text-xs sm:text-sm">
+                <thead>
+                    <!-- Baris Header Bidang (Kategori) -->
+                    <tr class="text-white">
+                        <th colspan="2" class="header-main border-r border-gray-300">UKURAN</th>
+                        <th rowspan="2" class="header-linmas border-r border-gray-300">LINMAS</th>
+                        <th colspan="9" class="header-rw">RW</th>
+                        <th rowspan="2" class="header-pkk border-l border-r border-gray-300">PKK</th>
+                        <th rowspan="2" class="header-posyandu border-r border-gray-300">POSYANDU</th>
+                        <th rowspan="2" class="header-bkm">BKM</th>
+                        <th rowspan="2" class="header-keltan">KELTAN</th>
+                        <th rowspan="2" class="header-kaderlin border-r border-gray-300">KADERLIN</th>
+                        <th rowspan="2" class="header-lpmk">LPMK</th>
+                        <th rowspan="2" class="header-kim border-r border-gray-300">KIM</th>
+                        <th rowspan="2" class="header-kelsi border-r border-gray-300">KELSI</th>
+                        <th rowspan="2" class="header-pokja">POKJA</th>
+                        <th rowspan="2" class="header-katar">KATAR</th>
+                        <th rowspan="2" class="header-kelurahan border-r border-gray-300">KELURAHAN</th>
+                        <th rowspan="2" class="header-total">TOTAL</th>
+                    </tr>
+                    <!-- Baris Header Spesifik Kolom -->
+                    <tr class="text-white font-medium text-center">
+                        <th class="header-ukuran-sub border-r border-gray-300">Size</th>
+                        <th class="header-ukuran-sub border-r border-gray-300">Tipe</th>
+                        <th class="header-rw-sub">01</th>
+                        <th class="header-rw-sub">02</th>
+                        <th class="header-rw-sub">03</th>
+                        <th class="header-rw-sub">04</th>
+                        <th class="header-rw-sub">05</th>
+                        <th class="header-rw-sub">06</th>
+                        <th class="header-rw-sub">07</th>
+                        <th class="header-rw-sub">08</th>
+                        <th class="header-rw-sub border-r border-gray-300">09</th>
+                    </tr>
+                </thead>
+                <tbody id="table-body" class="text-center text-gray-700">
+                    <!-- Data rows will be generated by JavaScript -->
+                </tbody>
+                <tfoot class="font-bold text-center bg-gray-100">
+                    <tr id="total-row" class="border-t-2 border-gray-300">
+                        <!-- Total row will be generated by JavaScript -->
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+
+        <!-- Summary Cards -->
+        <div class="mt-8 grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="bg-white p-6 rounded-lg shadow-md border-t-4 border-blue-500 flex items-center">
+                <div class="bg-blue-100 p-3 rounded-full mr-4">
+                    <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path></svg>
+                </div>
+                <div>
+                    <h3 class="font-semibold text-gray-600">Total Ukuran PENDEK</h3>
+                    <p id="summary-pendek" class="text-3xl font-bold text-gray-800 mt-1">0</p>
+                </div>
+            </div>
+            <div class="bg-white p-6 rounded-lg shadow-md border-t-4 border-red-500 flex items-center">
+                 <div class="bg-red-100 p-3 rounded-full mr-4">
+                    <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1M7 15h1m-4 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3zM12 15h.01"></path></svg>
+                </div>
+                <div>
+                    <h3 class="font-semibold text-gray-600">Total Ukuran PANJANG</h3>
+                    <p id="summary-panjang" class="text-3xl font-bold text-gray-800 mt-1">0</p>
+                </div>
+            </div>
+            <div class="bg-white p-6 rounded-lg shadow-md border-t-4 border-green-500 flex items-center">
+                 <div class="bg-green-100 p-3 rounded-full mr-4">
+                    <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                </div>
+                <div>
+                    <h3 class="font-semibold text-gray-600">Total Keseluruhan</h3>
+                    <p id="summary-grand-total" class="text-3xl font-bold text-gray-800 mt-1">0</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="mt-10 p-5 bg-gray-50 border border-gray-200 rounded-lg">
+            <h2 class="font-semibold text-gray-700 text-lg">Panduan Cepat</h2>
+            <ul class="list-disc list-inside text-gray-600 mt-2 space-y-2 text-sm">
+                <li>
+                    <strong>Isi Jumlah Pesanan:</strong>
+                    Langsung klik di kotak putih pada tabel dan ketik jumlah kaos yang dipesan.
+                </li>
+                <li>
+                    <strong>Total Otomatis:</strong>
+                    Tidak perlu kalkulator! Semua total akan dihitung langsung saat Anda mengisi.
+                </li>
+                 <li>
+                    <strong>Hapus Semua Data:</strong>
+                    Jika ingin memulai dari awal, klik tombol merah "Kosongkan Data" di bagian atas.
+                </li>
+                <li>
+                    <strong>Simpan Hasil:</strong>
+                    Setelah selesai, tekan <kbd>Ctrl</kbd> + <kbd>P</kbd> untuk menyimpan tabel ini sebagai file PDF.
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Modal Konfirmasi -->
+    <div id="confirm-modal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full flex items-center justify-center transition-opacity duration-300" style="display: none;">
+        <div class="bg-white p-6 rounded-lg shadow-xl w-11/12 max-w-sm">
+            <div class="flex items-center">
+                <div class="bg-red-100 p-3 rounded-full mr-4">
+                    <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                </div>
+                <div>
+                    <h3 class="text-lg font-bold text-gray-800">Konfirmasi</h3>
+                    <p class="py-2 text-gray-600">Anda yakin ingin mengosongkan seluruh data di tabel?</p>
+                </div>
+            </div>
+            <div class="flex justify-end space-x-3 mt-4">
+                <button id="cancel-clear" class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded-lg transition-colors duration-200">Batal</button>
+                <button id="confirm-clear" class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-lg transition-colors duration-200">Ya, Kosongkan</button>
+            </div>
+        </div>
+    </div>
+
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const sizes = ['S', 'M', 'L', 'XL', 'XXL', 'XXXL'];
+            const types = ['Pendek', 'Panjang'];
+            const numDataCols = 21; // LINMAS, RW(9), PKK, POS, BKM, KELTAN, KADERLIN, LPMK, KIM, KELSI, POKJA, KATAR, KELURAHAN
+
+            const initialData = {
+                 S: {
+                    Pendek: ['', '', '', '', '', '', '', '', '', '', '', '', '4', '', '', '', '', '', '', '', ''],
+                    Panjang: ['', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '']
+                },
+                M: {
+                    Pendek: ['', '10', '1', '2', '', '', '2', '', '', '', '6', '3', '1', '', '', '1', '', '', '9', '', ''],
+                    Panjang: ['', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '']
+                },
+                L: {
+                    Pendek: ['15', '3', '2', '3', '1', '3', '2', '5', '1', '1', '1', '17', '15', '2', '1', '10', '1', '1', '6', '7', ''],
+                    Panjang: ['', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '1']
+                },
+                XL: {
+                    Pendek: ['21', '2', '', '3', '1', '1', '2', '', '2', '2', '3', '5', '33', '4', '', '1', '', '3', '12', '8', ''],
+                    Panjang: ['', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '1']
+                },
+                XXL: {
+                    Pendek: ['5', '1', '2', '', '1', '2', '3', '1', '1', '1', '1', '6', '17', '', '', '1', '', '', '4', '1', ''],
+                    Panjang: ['', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '1']
+                },
+                XXXL: {
+                    Pendek: ['', '1', '', '2', '1', '', '1', '', '', '', '1', '9', '', '1', '', '', '', '', '1', '', ''],
+                    Panjang: ['', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '10']
+                }
+            };
+
+
+            const tableBody = document.getElementById('table-body');
+            const totalRow = document.getElementById('total-row');
+
+            function generateTable() {
+                sizes.forEach(size => {
+                    types.forEach((type, typeIndex) => {
+                        const row = document.createElement('tr');
+                        row.id = `row-${size}-${type}`;
+                        row.className = 'border-b border-gray-200 last:border-b-0';
+
+                        if (typeIndex === 0) {
+                            row.innerHTML += `<td rowspan="2" class="size-header border-r border-gray-200 p-2">${size}</td>`;
+                        }
+                        
+                        const typeBg = type === 'Panjang' ? 'bg-red-50' : 'bg-blue-50';
+                        row.innerHTML += `<td class="font-medium border-r border-gray-200 p-2 ${typeBg}">${type}</td>`;
+
+                        for (let i = 0; i < numDataCols; i++) {
+                            const cell = document.createElement('td');
+                            cell.className = 'border-r border-gray-200 last:border-r-0';
+                            const input = document.createElement('input');
+                            input.type = 'text';
+                            input.id = `cell-${size}-${type}-${i}`;
+                            input.className = 'data-input';
+                            input.value = initialData[size][type][i] || '';
+                            cell.appendChild(input);
+                            row.appendChild(cell);
+                        }
+
+                        row.innerHTML += `<td id="total-${size}-${type}" class="readonly-cell p-2">0</td>`;
+                        tableBody.appendChild(row);
+                    });
+                });
+
+                totalRow.innerHTML = `<td colspan="2" class="border-r border-gray-200 p-2 readonly-cell">TOTAL</td>`;
+                for (let i = 0; i < numDataCols; i++) {
+                    totalRow.innerHTML += `<td id="col-total-${i}" class="border-r last:border-r-0 border-gray-200 p-2 font-semibold">0</td>`;
+                }
+                totalRow.innerHTML += `<td id="grand-total" class="readonly-cell p-2">0</td>`;
+            }
+
+            function calculateTotals() {
+                const colTotals = Array(numDataCols).fill(0);
+                let grandTotal = 0;
+                let totalPendek = 0;
+                let totalPanjang = 0;
+
+                sizes.forEach(size => {
+                    types.forEach(type => {
+                        let rowTotal = 0;
+                        for (let i = 0; i < numDataCols; i++) {
+                            const input = document.getElementById(`cell-${size}-${type}-${i}`);
+                            if (!input) continue;
+                            const value = parseInt(input.value, 10) || 0;
+                            rowTotal += value;
+                            colTotals[i] += value;
+                        }
+                        document.getElementById(`total-${size}-${type}`).textContent = rowTotal;
+                        grandTotal += rowTotal;
+
+                        if (type === 'Pendek') {
+                            totalPendek += rowTotal;
+                        } else {
+                            totalPanjang += rowTotal;
+                        }
+                    });
+                });
+
+                for (let i = 0; i < numDataCols; i++) {
+                    document.getElementById(`col-total-${i}`).textContent = colTotals[i];
+                }
+
+                document.getElementById('grand-total').textContent = grandTotal;
+                
+                document.getElementById('summary-pendek').textContent = totalPendek;
+                document.getElementById('summary-panjang').textContent = totalPanjang;
+                document.getElementById('summary-grand-total').textContent = grandTotal;
+            }
+            
+            generateTable();
+            calculateTotals();
+
+            // Event Listeners
+            document.querySelectorAll('.data-input').forEach(input => {
+                input.addEventListener('input', calculateTotals);
+            });
+
+            // Clear Data Button Logic
+            const clearDataBtn = document.getElementById('clear-data-btn');
+            const confirmModal = document.getElementById('confirm-modal');
+            const cancelClearBtn = document.getElementById('cancel-clear');
+            const confirmClearBtn = document.getElementById('confirm-clear');
+
+            clearDataBtn.addEventListener('click', () => {
+                confirmModal.style.display = 'flex';
+            });
+
+            cancelClearBtn.addEventListener('click', () => {
+                confirmModal.style.display = 'none';
+            });
+
+            confirmClearBtn.addEventListener('click', () => {
+                document.querySelectorAll('.data-input').forEach(input => {
+                    input.value = '';
+                });
+                calculateTotals();
+                confirmModal.style.display = 'none';
+            });
+        });
+    </script>
+</body>
+</html>
+
