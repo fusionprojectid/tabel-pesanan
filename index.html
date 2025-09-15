@@ -3,36 +3,34 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rekapitulasi Pesanan Kaos "Tritunggal Lancar"</title>
+    <title>Rekapitulasi Pesanan "Tritunggal Lancar"</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         body {
             font-family: 'Inter', sans-serif;
         }
-        /* Custom styles untuk input agar menyatu dengan tabel */
         input[type="text"] {
             background-color: transparent;
             border: none;
             text-align: center;
             width: 100%;
             height: 100%;
-            padding: 0.75rem 0.5rem; /* Increased padding */
+            padding: 0.75rem 0.5rem;
             box-sizing: border-box;
-            font-size: 0.875rem; /* 14px */
+            font-size: 0.875rem;
             transition: background-color 0.2s ease-in-out;
         }
         .data-input:hover {
-            background-color: #f0f9ff; /* Light blue on hover */
+            background-color: #f0f9ff;
         }
         input[type="text"]:focus {
             outline: 2px solid #2563eb; 
             background-color: #e0f2fe;
             border-radius: 4px;
         }
-        /* Style untuk sel yang tidak bisa di-edit */
         .readonly-cell {
-            font-weight: 600; /* Semibold */
+            font-weight: 600;
             background-color: #f3f4f6;
             color: #1f2937;
         }
@@ -47,7 +45,6 @@
             vertical-align: middle;
             font-size: 0.9rem;
         }
-        /* Gradient header colors */
         .header-main { background-color: #4a5568; }
         .header-linmas { background-color: #0891b2; }
         .header-rw { background-color: #3b82f6; }
@@ -63,7 +60,6 @@
         .header-katar { background-color: #818cf8; }
         .header-kelurahan { background-color: #a5b4fc; }
         .header-total { background-color: #374151; }
-
         .header-rw-sub { background-color: #60a5fa; }
         .header-ukuran-sub { background-color: #6b7280; }
         kbd {
@@ -75,27 +71,38 @@
             border: 1px solid #d1d5db;
             border-radius: 0.25rem;
         }
+        @media print {
+            body {
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+            .no-print {
+                display: none !important;
+            }
+            .printable-area {
+                box-shadow: none !important;
+                border: none !important;
+                margin: 0 !important;
+                padding: 0 !important;
+            }
+            table {
+                font-size: 10px;
+            }
+        }
     </style>
 </head>
 <body class="bg-gray-50 p-4 sm:p-6 md:p-8">
-    <div class="max-w-full mx-auto bg-white p-6 rounded-xl shadow-lg">
-        <div class="flex flex-col sm:flex-row justify-between items-center gap-4 mb-8">
+    <div class="max-w-full mx-auto bg-white p-6 rounded-xl shadow-lg printable-area">
+        <div class="flex flex-col sm:flex-row justify-between items-center gap-4 mb-8 no-print">
             <div class="text-center sm:text-left">
-                <h1 class="text-2xl sm:text-3xl font-bold text-gray-800">Rekapitulasi Pesanan Kaos</h1>
-                <p class="text-md sm:text-lg text-gray-500">"Tritunggal Lancar"</p>
-            </div>
-            <div>
-                <button id="clear-data-btn" class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-lg flex items-center transition-colors duration-200">
-                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                    Kosongkan Data
-                </button>
+                <img src="/logo.png" alt="Logo Perusahaan" class="mx-auto sm:mx-0 h-16 w-auto mb-4" onerror="this.style.display='none'; this.onerror=null;">
+                <h1 class="text-2xl sm:text-3xl font-bold text-gray-800">Rekapitulasi Pesanan</h1>
             </div>
         </div>
         
         <div class="overflow-x-auto rounded-lg shadow-md border border-gray-200">
             <table id="interactive-table" class="w-full border-collapse text-xs sm:text-sm">
                 <thead>
-                    <!-- Baris Header Bidang (Kategori) -->
                     <tr class="text-white">
                         <th colspan="2" class="header-main border-r border-gray-300">UKURAN</th>
                         <th rowspan="2" class="header-linmas border-r border-gray-300">LINMAS</th>
@@ -113,7 +120,6 @@
                         <th rowspan="2" class="header-kelurahan border-r border-gray-300">KELURAHAN</th>
                         <th rowspan="2" class="header-total">TOTAL</th>
                     </tr>
-                    <!-- Baris Header Spesifik Kolom -->
                     <tr class="text-white font-medium text-center">
                         <th class="header-ukuran-sub border-r border-gray-300">Size</th>
                         <th class="header-ukuran-sub border-r border-gray-300">Tipe</th>
@@ -169,8 +175,23 @@
                 </div>
             </div>
         </div>
+        
+        <div class="mt-8 pt-6 border-t border-gray-200 flex flex-wrap justify-center gap-3 no-print">
+             <button id="print-btn" class="bg-sky-500 hover:bg-sky-600 text-white font-bold py-2 px-4 rounded-lg flex items-center transition-colors duration-200">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
+                Cetak / Simpan PDF
+            </button>
+             <button id="whatsapp-btn" class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-lg flex items-center transition-colors duration-200">
+                <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.894 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.886-.001 2.225.651 4.315 1.731 6.086l.001.004 4.971 4.971z"></path></svg>
+                Kirim via WhatsApp
+            </button>
+            <button id="clear-data-btn" class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-lg flex items-center transition-colors duration-200">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                Kosongkan Data
+            </button>
+        </div>
 
-        <div class="mt-10 p-5 bg-gray-50 border border-gray-200 rounded-lg">
+        <div class="mt-8 p-5 bg-gray-50 border border-gray-200 rounded-lg no-print">
             <h2 class="font-semibold text-gray-700 text-lg">Panduan Cepat</h2>
             <ul class="list-disc list-inside text-gray-600 mt-2 space-y-2 text-sm">
                 <li>
@@ -181,89 +202,84 @@
                     <strong>Total Otomatis:</strong>
                     Tidak perlu kalkulator! Semua total akan dihitung langsung saat Anda mengisi.
                 </li>
+                <li>
+                    <strong>Cetak / Simpan PDF:</strong>
+                    Gunakan tombol "Cetak / Simpan PDF" di atas untuk menyimpan rekapitulasi ini sebagai file PDF di perangkat Anda.
+                </li>
                  <li>
-                    <strong>Hapus Semua Data:</strong>
-                    Jika ingin memulai dari awal, klik tombol merah "Kosongkan Data" di bagian atas.
+                    <strong>Kirim via WhatsApp:</strong>
+                    Setelah menyimpan PDF, gunakan tombol "Kirim via WhatsApp" untuk membuka aplikasi dan mengirim file tersebut.
                 </li>
                 <li>
-                    <strong>Simpan Hasil:</strong>
-                    Setelah selesai, tekan <kbd>Ctrl</kbd> + <kbd>P</kbd> untuk menyimpan tabel ini sebagai file PDF.
+                    <strong>Hapus Semua Data:</strong>
+                    Gunakan tombol "Kosongkan Data" jika ingin memulai dari awal.
                 </li>
             </ul>
         </div>
     </div>
 
-    <!-- Modal Konfirmasi -->
-    <div id="confirm-modal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full flex items-center justify-center transition-opacity duration-300" style="display: none;">
+    <!-- Modal Konfirmasi Hapus -->
+    <div id="confirm-modal" class="fixed inset-0 bg-gray-600 bg-opacity-50 h-full w-full flex items-center justify-center" style="display: none;">
         <div class="bg-white p-6 rounded-lg shadow-xl w-11/12 max-w-sm">
-            <div class="flex items-center">
-                <div class="bg-red-100 p-3 rounded-full mr-4">
-                    <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
-                </div>
-                <div>
-                    <h3 class="text-lg font-bold text-gray-800">Konfirmasi</h3>
-                    <p class="py-2 text-gray-600">Anda yakin ingin mengosongkan seluruh data di tabel?</p>
-                </div>
-            </div>
+            <h3 class="text-lg font-bold text-gray-800">Konfirmasi</h3>
+            <p class="py-2 text-gray-600">Anda yakin ingin mengosongkan seluruh data di tabel?</p>
             <div class="flex justify-end space-x-3 mt-4">
-                <button id="cancel-clear" class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded-lg transition-colors duration-200">Batal</button>
-                <button id="confirm-clear" class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-lg transition-colors duration-200">Ya, Kosongkan</button>
+                <button id="cancel-clear" class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded-lg">Batal</button>
+                <button id="confirm-clear" class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-lg">Ya, Kosongkan</button>
             </div>
         </div>
     </div>
-
+    
+    <!-- Modal Kirim WhatsApp -->
+    <div id="whatsapp-modal" class="fixed inset-0 bg-gray-600 bg-opacity-50 h-full w-full flex items-center justify-center" style="display: none;">
+        <div class="bg-white p-6 rounded-lg shadow-xl w-11/12 max-w-md">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-bold text-gray-800">Kirim Rekapitulasi via WhatsApp</h3>
+                <button id="close-whatsapp-modal" class="text-gray-500 hover:text-gray-800">&times;</button>
+            </div>
+            <div class="space-y-4">
+                <div>
+                    <p class="font-semibold text-gray-700">Langkah 1: Simpan Tabel sebagai PDF</p>
+                    <p class="text-sm text-gray-600">Klik tombol di bawah ini, lalu pada dialog yang muncul, pilih tujuan **"Save as PDF"**.</p>
+                    <button id="modal-print-btn" class="mt-2 w-full bg-sky-500 hover:bg-sky-600 text-white font-bold py-2 px-4 rounded-lg">Cetak & Simpan PDF</button>
+                </div>
+                <div>
+                    <p class="font-semibold text-gray-700">Langkah 2: Buka WhatsApp dan Kirim File</p>
+                    <p class="text-sm text-gray-600">Setelah file PDF tersimpan di perangkat Anda, klik tombol di bawah untuk membuka WhatsApp, lalu kirim file tersebut sebagai lampiran dokumen.</p>
+                    <a href="https://web.whatsapp.com" target="_blank" class="mt-2 w-full bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-lg flex items-center justify-center">
+                        Buka WhatsApp
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const sizes = ['S', 'M', 'L', 'XL', 'XXL', 'XXXL'];
             const types = ['Pendek', 'Panjang'];
-            const numDataCols = 21; // LINMAS, RW(9), PKK, POS, BKM, KELTAN, KADERLIN, LPMK, KIM, KELSI, POKJA, KATAR, KELURAHAN
-
+            const numDataCols = 21;
             const initialData = {
-                 S: {
-                    Pendek: ['', '', '', '', '', '', '', '', '', '', '', '', '4', '', '', '', '', '', '', '', ''],
-                    Panjang: ['', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '']
-                },
-                M: {
-                    Pendek: ['', '10', '1', '2', '', '', '2', '', '', '', '6', '3', '1', '', '', '1', '', '', '9', '', ''],
-                    Panjang: ['', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '']
-                },
-                L: {
-                    Pendek: ['15', '3', '2', '3', '1', '3', '2', '5', '1', '1', '1', '17', '15', '2', '1', '10', '1', '1', '6', '7', ''],
-                    Panjang: ['', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '1']
-                },
-                XL: {
-                    Pendek: ['21', '2', '', '3', '1', '1', '2', '', '2', '2', '3', '5', '33', '4', '', '1', '', '3', '12', '8', ''],
-                    Panjang: ['', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '1']
-                },
-                XXL: {
-                    Pendek: ['5', '1', '2', '', '1', '2', '3', '1', '1', '1', '1', '6', '17', '', '', '1', '', '', '4', '1', ''],
-                    Panjang: ['', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '1']
-                },
-                XXXL: {
-                    Pendek: ['', '1', '', '2', '1', '', '1', '', '', '', '1', '9', '', '1', '', '', '', '', '1', '', ''],
-                    Panjang: ['', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '10']
-                }
+                 S: { Pendek: ['', '', '', '', '', '', '', '', '', '', '', '', '4', '', '', '', '', '', '', '', ''], Panjang: ['', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', ''] },
+                M: { Pendek: ['', '10', '1', '2', '', '', '2', '', '', '', '6', '3', '1', '', '', '1', '', '', '9', '', ''], Panjang: ['', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', ''] },
+                L: { Pendek: ['15', '3', '2', '3', '1', '3', '2', '5', '1', '1', '1', '17', '15', '2', '1', '10', '1', '1', '6', '7', ''], Panjang: ['', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '1'] },
+                XL: { Pendek: ['21', '2', '', '3', '1', '1', '2', '', '2', '2', '3', '5', '33', '4', '', '1', '', '3', '12', '8', ''], Panjang: ['', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '1'] },
+                XXL: { Pendek: ['5', '1', '2', '', '1', '2', '3', '1', '1', '1', '1', '6', '17', '', '', '1', '', '', '4', '1', ''], Panjang: ['', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '1'] },
+                XXXL: { Pendek: ['', '1', '', '2', '1', '', '1', '', '', '', '1', '9', '', '1', '', '', '', '', '1', '', ''], Panjang: ['', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '10'] }
             };
-
-
             const tableBody = document.getElementById('table-body');
             const totalRow = document.getElementById('total-row');
-
             function generateTable() {
                 sizes.forEach(size => {
                     types.forEach((type, typeIndex) => {
                         const row = document.createElement('tr');
                         row.id = `row-${size}-${type}`;
                         row.className = 'border-b border-gray-200 last:border-b-0';
-
                         if (typeIndex === 0) {
                             row.innerHTML += `<td rowspan="2" class="size-header border-r border-gray-200 p-2">${size}</td>`;
                         }
-                        
                         const typeBg = type === 'Panjang' ? 'bg-red-50' : 'bg-blue-50';
                         row.innerHTML += `<td class="font-medium border-r border-gray-200 p-2 ${typeBg}">${type}</td>`;
-
                         for (let i = 0; i < numDataCols; i++) {
                             const cell = document.createElement('td');
                             cell.className = 'border-r border-gray-200 last:border-r-0';
@@ -275,25 +291,21 @@
                             cell.appendChild(input);
                             row.appendChild(cell);
                         }
-
                         row.innerHTML += `<td id="total-${size}-${type}" class="readonly-cell p-2">0</td>`;
                         tableBody.appendChild(row);
                     });
                 });
-
                 totalRow.innerHTML = `<td colspan="2" class="border-r border-gray-200 p-2 readonly-cell">TOTAL</td>`;
                 for (let i = 0; i < numDataCols; i++) {
                     totalRow.innerHTML += `<td id="col-total-${i}" class="border-r last:border-r-0 border-gray-200 p-2 font-semibold">0</td>`;
                 }
                 totalRow.innerHTML += `<td id="grand-total" class="readonly-cell p-2">0</td>`;
             }
-
             function calculateTotals() {
                 const colTotals = Array(numDataCols).fill(0);
                 let grandTotal = 0;
                 let totalPendek = 0;
                 let totalPanjang = 0;
-
                 sizes.forEach(size => {
                     types.forEach(type => {
                         let rowTotal = 0;
@@ -306,7 +318,6 @@
                         }
                         document.getElementById(`total-${size}-${type}`).textContent = rowTotal;
                         grandTotal += rowTotal;
-
                         if (type === 'Pendek') {
                             totalPendek += rowTotal;
                         } else {
@@ -314,46 +325,64 @@
                         }
                     });
                 });
-
                 for (let i = 0; i < numDataCols; i++) {
                     document.getElementById(`col-total-${i}`).textContent = colTotals[i];
                 }
-
                 document.getElementById('grand-total').textContent = grandTotal;
-                
                 document.getElementById('summary-pendek').textContent = totalPendek;
                 document.getElementById('summary-panjang').textContent = totalPanjang;
                 document.getElementById('summary-grand-total').textContent = grandTotal;
             }
-            
             generateTable();
             calculateTotals();
-
-            // Event Listeners
             document.querySelectorAll('.data-input').forEach(input => {
                 input.addEventListener('input', calculateTotals);
             });
 
-            // Clear Data Button Logic
+            // Modal Hapus
             const clearDataBtn = document.getElementById('clear-data-btn');
             const confirmModal = document.getElementById('confirm-modal');
             const cancelClearBtn = document.getElementById('cancel-clear');
             const confirmClearBtn = document.getElementById('confirm-clear');
-
-            clearDataBtn.addEventListener('click', () => {
-                confirmModal.style.display = 'flex';
-            });
-
-            cancelClearBtn.addEventListener('click', () => {
-                confirmModal.style.display = 'none';
-            });
-
+            clearDataBtn.addEventListener('click', () => { confirmModal.style.display = 'flex'; });
+            cancelClearBtn.addEventListener('click', () => { confirmModal.style.display = 'none'; });
             confirmClearBtn.addEventListener('click', () => {
-                document.querySelectorAll('.data-input').forEach(input => {
-                    input.value = '';
-                });
+                document.querySelectorAll('.data-input').forEach(input => { input.value = ''; });
                 calculateTotals();
                 confirmModal.style.display = 'none';
+            });
+
+            // FUNGSI BARU: Print & WhatsApp
+            const printBtn = document.getElementById('print-btn');
+            const whatsappBtn = document.getElementById('whatsapp-btn');
+            const whatsappModal = document.getElementById('whatsapp-modal');
+            const closeWhatsappModalBtn = document.getElementById('close-whatsapp-modal');
+            const modalPrintBtn = document.getElementById('modal-print-btn');
+
+            printBtn.addEventListener('click', () => {
+                window.print();
+            });
+            
+            modalPrintBtn.addEventListener('click', () => {
+                window.print();
+            });
+
+            whatsappBtn.addEventListener('click', () => {
+                whatsappModal.style.display = 'flex';
+            });
+
+            closeWhatsappModalBtn.addEventListener('click', () => {
+                whatsappModal.style.display = 'none';
+            });
+            
+            // Klik di luar modal untuk menutup
+            window.addEventListener('click', function(event) {
+                if (event.target == confirmModal) {
+                    confirmModal.style.display = "none";
+                }
+                if (event.target == whatsappModal) {
+                    whatsappModal.style.display = "none";
+                }
             });
         });
     </script>
