@@ -1,4 +1,3 @@
-```markdown
 # Rekapitulasi Pesanan "Tritunggal Lancar"
 
 Aplikasi web client-side yang dirancang untuk rekapitulasi dan kalkulasi pesanan kaos secara efisien.
