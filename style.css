@@ -1,96 +1,71 @@
-/* Palet Warna dari Logo */
 :root {
-    --brand-dark: #4D2D1B; /* Coklat Tua */
-    --brand-primary: #E88D39; /* Oranye */
-    --brand-secondary: #FBC93D; /* Kuning */
-    --brand-light: #FFFBEB; /* Kuning Sangat Muda */
+    --brand-dark: #2D2D2D;
+    --brand-primary: #F97316; /* orange-600 */
+    --brand-secondary: #EA580C; /* orange-700 */
+    --brand-light: #FFF7ED; /* orange-50 */
 }
 
-body {
-    font-family: 'Poppins', sans-serif;
-    background-color: var(--brand-light);
+body { 
+  font-family: 'Poppins', sans-serif; 
+  background-color: #f8fafc; /* gray-50 */
 }
 
-input[type="text"], input[type="number"] {
-    background-color: transparent;
-    border: none;
-    text-align: center;
-    width: 100%;
-    height: 100%;
-    padding: 0.75rem 0.5rem;
-    box-sizing: border-box;
-    font-size: 0.875rem;
-    transition: background-color 0.2s ease-in-out;
+.money { 
+    font-variant-numeric: tabular-nums; 
 }
 
-.data-input:hover {
-    background-color: #FEF3C7; /* Kuning muda */
+.btn-primary { 
+    background-color: var(--brand-primary); 
+    color: white; 
+    transition: background-color 0.2s; 
+}
+.btn-primary:hover { 
+    background-color: var(--brand-secondary); 
 }
 
-input[type="text"]:focus, input[type="number"]:focus {
-    outline: 2px solid var(--brand-primary); 
-    background-color: #FEF9C3;
-    border-radius: 4px;
+.btn-secondary { 
+    background-color: #ef4444; /* red-500 */
+    color: white; 
+    transition: background-color 0.2s; 
+}
+.btn-secondary:hover { 
+    background-color: #dc2626; /* red-600 */
 }
 
-.readonly-cell {
-    font-weight: 600;
-    background-color: #F3F4F6;
-    color: #1f2937;
+.btn-tertiary { 
+    background-color: #4f46e5; /* indigo-600 */
+    color: white; 
+    transition: background-color 0.2s; 
+}
+.btn-tertiary:hover { 
+    background-color: #4338ca; /* indigo-700 */
 }
 
-th {
-    padding: 10px 4px;
-    vertical-align: middle;
-    font-weight: 600;
-    word-break: break-word;
+.btn-success { 
+    background-color: #22c55e; /* green-500 */
+    color: white; 
+    transition: background-color 0.2s; 
+}
+.btn-success:hover { 
+    background-color: #16a34a; /* green-600 */
 }
 
-.size-header {
-    font-weight: 700;
-    background-color: #f9fafb;
-    vertical-align: middle;
-    font-size: 0.9rem;
+.tab-btn.active { 
+    border-bottom: 3px solid var(--brand-primary); 
+    color: var(--brand-dark); 
+    font-weight: 600; 
 }
 
-.header-main { background-color: var(--brand-dark); }
-.header-linmas, .header-rw, .header-pkk, .header-posyandu,
-.header-bkm, .header-keltan, .header-kaderlin,
-.header-lpmk, .header-kim, .header-kelsi,
-.header-pokja, .header-katar, .header-kelurahan {
-    background-color: var(--brand-primary);
-}
-.header-total { background-color: var(--brand-dark); }
-.header-rw-sub { background-color: #FDBA74; } /* Oranye lebih muda */
-.header-ukuran-sub { background-color: #78716C; } /* Abu-abu hangat */
-
-.tab-btn.active {
-    border-bottom: 3px solid var(--brand-primary);
-    color: var(--brand-primary);
-    font-weight: 600;
+.header-main { 
+    background-color: var(--brand-dark); 
 }
 
-.btn-primary {
-    background-color: var(--brand-dark);
-    color: white;
-}
-.btn-primary:hover {
-    background-color: #3a2215;
-}
-.btn-secondary {
-    background-color: var(--brand-primary);
-    color: white;
-}
-.btn-secondary:hover {
-    background-color: #d97706;
+.hidden {
+    display: none;
 }
 
-/* Aturan khusus untuk mencetak */
 @media print {
-    body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-    .no-print { display: none !important; }
-    .printable-area { box-shadow: none !important; border: none !important; margin: 0 !important; padding: 0 !important; }
-    table { font-size: 9px; }
-    th, td { padding: 4px 2px !important; }
-    input[type="text"] { padding: 4px 2px !important; }
+    .no-print { display: none; }
+    body { padding: 0; margin: 0; background-color: white; }
+    main { box-shadow: none !important; border: none !important; margin: 0; padding: 0; }
 }
