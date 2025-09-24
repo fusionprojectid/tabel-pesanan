@@ -1,180 +1,402 @@
-document.addEventListener('DOMContentLoaded', function() {
-    const sizes = ['S', 'M', 'L', 'XL', 'XXL', 'XXXL'];
-    const types = ['Pen', 'Pan'];
-    const dataCols = ['LINMAS', 'RW 01', 'RW 02', 'RW 03', 'RW 04', 'RW 05', 'RW 06', 'RW 07', 'RW 08', 'RW 09', 'PKK', 'POSYANDU', 'BKM', 'KELTAN', 'KADERLIN', 'LPMK', 'KIM', 'KELSI', 'POKJA', 'KATAR', 'KELURAHAN'];
-    const numDataCols = dataCols.length;
-    const initialData = {
-         S: { Pen: ['', '', '', '', '', '', '', '', '', '', '', '', '4', '', '', '', '', '', '', '', ''], Pan: ['', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', ''] },
-        M: { Pen: ['', '10', '1', '2', '', '', '2', '', '', '', '6', '3', '1', '', '', '1', '', '', '9', '', ''], Pan: ['', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', ''] },
-        L: { Pen: ['15', '3', '2', '3', '1', '3', '2', '5', '1', '1', '1', '17', '15', '2', '1', '10', '1', '1', '6', '7', ''], Pan: ['', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '1'] },
-        XL: { Pen: ['21', '2', '', '3', '1', '1', '2', '', '2', '2', '3', '5', '33', '4', '', '1', '', '3', '12', '8', ''], Pan: ['', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '1'] },
-        XXL: { Pen: ['5', '1', '2', '', '1', '2', '3', '1', '1', '1', '1', '6', '17', '', '', '1', '', '', '4', '1', ''], Pan: ['', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '1'] },
-        XXXL: { Pen: ['', '1', '', '2', '1', '', '1', '', '', '', '1', '9', '', '1', '', '', '', '', '1', '', ''], Pan: ['', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '10'] }
-    };
+// KONSTANTA & DATA HARGA
+const HARGA_BARANG = {
+    'Kaos': 85000,
+    'Jaket Hoodie': 150000,
+    'Jaket Gunung': 250000,
+    'Gantungan Kunci': 8000,
+    'Pulpen': 8000,
+    'Block Note': 8000,
+    'PDL': 185000, // Harga asumsi
+    'Topi': 45000,   // Harga asumsi
+};
+const BARANG_PAKAI_UKURAN = ['Kaos', 'Jaket Hoodie', 'Jaket Gunung', 'PDL', 'Topi'];
+const UKURAN_BIAYA_TAMBAHAN = ['XXL', 'XXXL'];
+const BIAYA_TAMBAHAN = 10000;
 
-    function generateTable() {
-        const tableBody = document.getElementById('table-body');
-        const totalRow = document.getElementById('total-row');
-        tableBody.innerHTML = '';
-        sizes.forEach(size => {
-            types.forEach((type, typeIndex) => {
-                const row = document.createElement('tr');
-                if (typeIndex === 0) row.innerHTML += `<td rowspan="2" class="size-header border-r border-gray-200 p-2">${size}</td>`;
-                const typeBg = type === 'Pan' ? 'bg-red-50' : 'bg-yellow-50';
-                row.innerHTML += `<td class="font-medium border-r border-gray-200 p-2 ${typeBg}">${type}</td>`;
-                for (let i = 0; i < numDataCols; i++) {
-                    const input = document.createElement('input');
-                    input.type = 'text';
-                    input.id = `cell-${size}-${type}-${i}`;
-                    input.className = 'data-input';
-                    input.value = initialData[size][type][i] || '';
-                    const cell = document.createElement('td');
-                    cell.className = 'border-r border-gray-200 last:border-r-0';
-                    cell.appendChild(input);
-                    row.appendChild(cell);
-                }
-                row.innerHTML += `<td id="total-${size}-${type}" class="readonly-cell p-2">0</td>`;
-                tableBody.appendChild(row);
-            });
-        });
-        totalRow.innerHTML = `<td colspan="2" class="border-r border-gray-200 p-2 readonly-cell">TOTAL</td>`;
-        for (let i = 0; i < numDataCols; i++) totalRow.innerHTML += `<td id="col-total-${i}" class="border-r last:border-r-0 border-gray-200 p-2 font-semibold">0</td>`;
-        totalRow.innerHTML += `<td id="grand-total" class="readonly-cell p-2">0</td>`;
-        document.querySelectorAll('.data-input').forEach(input => input.addEventListener('input', calculateTotals));
+// FUNGSI HELPER
+function formatRupiah(n) { return "Rp" + new Intl.NumberFormat("id-ID").format(n); }
+function getPesanan() { return JSON.parse(localStorage.getItem("pesananKaos") || "[]"); }
+function setPesanan(data) { localStorage.setItem("pesananKaos", JSON.stringify(data)); }
+function formatTanggal(date) { return date.toLocaleString("id-ID", { year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit" }); }
+
+function hitungHargaSatuan(item) {
+    let harga = HARGA_BARANG[item.barang] || 0;
+    if (item.barang === 'Kaos') {
+        if (item.tipeLengan === 'Panjang') {
+            harga += BIAYA_TAMBAHAN;
+        }
+        if (UKURAN_BIAYA_TAMBAHAN.includes(item.ukuran)) {
+            harga += BIAYA_TAMBAHAN;
+        }
     }
+    return harga;
+}
 
-    function calculateTotals() {
-        const colTotals = Array(numDataCols).fill(0);
-        let grandTotal = 0, totalPendek = 0, totalPanjang = 0;
-        sizes.forEach(size => {
-            types.forEach(type => {
-                let rowTotal = 0;
-                for (let i = 0; i < numDataCols; i++) {
-                    const input = document.getElementById(`cell-${size}-${type}-${i}`);
-                    const value = parseInt(input.value) || 0;
-                    rowTotal += value;
-                    colTotals[i] += value;
-                }
-                document.getElementById(`total-${size}-${type}`).textContent = rowTotal;
-                grandTotal += rowTotal;
-                if (type === 'Pen') totalPendek += rowTotal; else totalPanjang += rowTotal;
-            });
+function hitungDiskon(jumlah) {
+  if (jumlah >= 500) return 0.5;
+  if (jumlah >= 100) return 0.25;
+  if (jumlah >= 50) return 0.1;
+  return 0;
+}
+
+function generateEmailBody() {
+    const pesanan = getPesanan();
+    if (pesanan.length === 0) return "Tidak ada data pesanan untuk dikirim.";
+
+    const grup = {};
+    pesanan.forEach(p => { (grup[p.nama.toLowerCase()] = grup[p.nama.toLowerCase()] || []).push(p); });
+
+    let body = "Berikut adalah rekapitulasi pesanan:\n\n";
+    let grandTotalAkhir = 0;
+
+    Object.values(grup).forEach(group => {
+        body += `================================\n`;
+        body += `NAMA PEMESAN: ${group[0].nama}\n`;
+        body += `--------------------------------\n`;
+
+        let totalPerNamaSetelahDiskon = 0;
+
+        group.forEach(p => {
+            const hargaSatuan = hitungHargaSatuan(p);
+            const subtotalOriginal = hargaSatuan * p.jumlah;
+            const diskonRate = hitungDiskon(p.jumlah);
+            const diskonAmount = subtotalOriginal * diskonRate;
+            const subtotalFinal = subtotalOriginal - diskonAmount;
+            totalPerNamaSetelahDiskon += subtotalFinal;
+            
+            let detail = p.barang;
+            if (BARANG_PAKAI_UKURAN.includes(p.barang)) detail += ` (${p.ukuran})`;
+            if (p.barang === 'Kaos') detail += `, ${p.tipeLengan}`;
+            
+            body += `${p.jumlah}x ${detail} @ ${formatRupiah(hargaSatuan)} = ${formatRupiah(subtotalOriginal)}\n`;
+            if (diskonAmount > 0) {
+                body += `  (Diskon ${diskonRate * 100}%: -${formatRupiah(diskonAmount)})\n`;
+            }
         });
-        for (let i = 0; i < numDataCols; i++) document.getElementById(`col-total-${i}`).textContent = colTotals[i];
-        document.getElementById('grand-total').textContent = grandTotal;
-        document.getElementById('summary-pendek').textContent = totalPendek;
-        document.getElementById('summary-panjang').textContent = totalPanjang;
-        document.getElementById('summary-grand-total').textContent = grandTotal;
-    }
+        
+        grandTotalAkhir += totalPerNamaSetelahDiskon;
 
-    generateTable();
-    calculateTotals();
+        body += `--------------------------------\n`;
+        body += `TOTAL: ${formatRupiah(totalPerNamaSetelahDiskon)}\n\n`;
+    });
     
-    // View Switching Logic
-    const tabs = [
-        { btn: document.getElementById('tab-form'), view: document.getElementById('view-form') },
-        { btn: document.getElementById('tab-rekap'), view: document.getElementById('view-rekap') },
-        { btn: document.getElementById('tab-lokasi'), view: document.getElementById('view-lokasi') }
-    ];
+    body += `================================\n`;
+    body += `TOTAL KESELURUHAN: ${formatRupiah(grandTotalAkhir)}\n\n`;
+    body += `Terima kasih atas pesanannya.\n`;
+
+    return body;
+}
+
+
+// FUNGSI RENDER TABEL DAN REKAP
+function renderHasil() {
+  const pesanan = getPesanan();
+  const tbody = document.getElementById("tabel-hasil");
+  tbody.innerHTML = "";
+
+  const grup = {};
+  pesanan.forEach(p => { (grup[p.nama.toLowerCase()] = grup[p.nama.toLowerCase()] || []).push(p); });
+
+  let grandTotalSebelumDiskon = 0, grandTotalDiskon = 0, grandTotalSetelahDiskon = 0;
+  const itemCounts = {};
+  let i = 1;
+
+  Object.values(grup).forEach(group => {
+    let namaTotalSebelumDiskon = 0, namaTotalDiskon = 0, namaTotalSetelahDiskon = 0;
+
+    group.forEach((p, idx) => {
+      const hargaSatuan = hitungHargaSatuan(p);
+      const subtotalOriginal = hargaSatuan * p.jumlah;
+      const diskonRate = hitungDiskon(p.jumlah);
+      const diskonAmount = subtotalOriginal * diskonRate;
+      const subtotalFinal = subtotalOriginal - diskonAmount;
+
+      namaTotalSebelumDiskon += subtotalOriginal;
+      namaTotalDiskon += diskonAmount;
+      namaTotalSetelahDiskon += subtotalFinal;
+
+      itemCounts[p.barang] = (itemCounts[p.barang] || 0) + p.jumlah;
+
+      let detail = p.ukuran || '';
+      if (p.barang === 'Kaos' && p.tipeLengan) {
+          detail = `${p.tipeLengan}, ${p.ukuran}`;
+      }
+
+      const tr = document.createElement("tr");
+      tr.className = "hover:bg-gray-50 text-center";
+      tr.innerHTML = `
+        <td class="border p-2 text-xs">${i++}</td>
+        ${idx === 0 ? `<td class="border p-2 font-semibold text-left align-top" rowspan="${group.length + 1}">${p.nama}</td>` : ""}
+        <td class="border p-2 text-left">${p.barang}</td>
+        <td class="border p-2">${detail || '-'}</td>
+        <td class="border p-2">${p.jumlah}</td>
+        <td class="border p-2 money text-right">${formatRupiah(hargaSatuan)}</td>
+        <td class="border p-2 money text-right">${formatRupiah(subtotalOriginal)}</td>
+        <td class="border p-2">
+            <div class="flex justify-center items-center space-x-1">
+                <button class="edit-item-btn p-1.5 rounded-full text-gray-500 hover:bg-blue-100 hover:text-blue-600 transition-colors duration-200" data-id="${p.id}" title="Ubah jumlah">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.5L16.732 3.732z"></path></svg>
+                </button>
+                <button class="delete-item-btn p-1.5 rounded-full text-gray-500 hover:bg-red-100 hover:text-red-600 transition-colors duration-200" data-id="${p.id}" title="Hapus item ini">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                </button>
+            </div>
+        </td>
+      `;
+      tbody.appendChild(tr);
+    });
+    
+    grandTotalSebelumDiskon += namaTotalSebelumDiskon;
+    grandTotalDiskon += namaTotalDiskon;
+    grandTotalSetelahDiskon += namaTotalSetelahDiskon;
+
+    const trTotal = document.createElement("tr");
+    trTotal.className = "font-semibold";
+    trTotal.style.backgroundColor = 'var(--brand-light)';
+    trTotal.innerHTML = `
+      <td colspan="5" class="border p-2 text-right text-sm font-bold" style="color: var(--brand-dark);">
+        Total untuk ${group[0].nama} (Diskon: <span class="font-medium" style="color: var(--brand-secondary);">${formatRupiah(namaTotalDiskon)}</span>)
+      </td>
+      <td class="border p-2 money text-right text-sm font-bold" style="color: var(--brand-dark);">
+          ${formatRupiah(namaTotalSetelahDiskon)}
+      </td>
+      <td class="border p-2 text-center">
+        <button class="delete-group-btn bg-red-100 text-red-700 hover:bg-red-200 text-xs font-semibold px-2 py-1 rounded-md transition-colors" data-name="${group[0].nama}" title="Hapus semua pesanan ${group[0].nama}">
+            Hapus Semua
+        </button>
+      </td>
+    `;
+    tbody.appendChild(trTotal);
+  });
+  
+  document.getElementById("grand-total").textContent = formatRupiah(grandTotalSebelumDiskon);
+  document.getElementById("diskon").textContent = `- ${formatRupiah(grandTotalDiskon)}`;
+  document.getElementById("total-diskon").textContent = formatRupiah(grandTotalSetelahDiskon);
+  
+  let rekapHTML = '';
+  for (const barang in itemCounts) {
+      rekapHTML += `
+        <div class="bg-white p-6 rounded-lg shadow-md border-t-4" style="border-color: var(--brand-primary);">
+            <h3 class="font-semibold text-gray-600">Total ${barang}</h3>
+            <p class="text-3xl font-bold mt-1" style="color: var(--brand-dark);">${itemCounts[barang]}</p>
+        </div>
+      `;
+  }
+  document.getElementById("rekap").innerHTML = rekapHTML;
+}
+
+// MODAL FUNCTIONS
+const modalOverlay = document.getElementById('modal-overlay');
+const modalTitle = document.getElementById('modal-title');
+const modalMessage = document.getElementById('modal-message');
+const modalInput = document.getElementById('modal-input');
+const modalActions = document.getElementById('modal-actions');
+const modalCloseBtn = document.getElementById('modal-close-btn');
+
+function hideModal() {
+    modalOverlay.classList.add('hidden');
+}
+
+function showModal(options) {
+    modalTitle.textContent = options.title || 'Pemberitahuan';
+    modalMessage.textContent = options.message || '';
+    modalActions.innerHTML = ''; 
+
+    modalInput.classList.toggle('hidden', options.type !== 'prompt');
+    if (options.type === 'prompt') {
+        modalInput.value = options.defaultValue || '';
+        const saveBtn = document.createElement('button');
+        saveBtn.textContent = 'Simpan';
+        saveBtn.className = 'btn-primary font-bold py-2 px-4 rounded-lg';
+        saveBtn.onclick = () => {
+            if (options.onOk) options.onOk(modalInput.value);
+            hideModal();
+        };
+        modalActions.appendChild(saveBtn);
+    }
+    
+    if (options.type === 'confirm') {
+        const okBtn = document.createElement('button');
+        okBtn.textContent = 'Ya';
+        okBtn.className = 'btn-primary font-bold py-2 px-4 rounded-lg';
+        okBtn.onclick = () => {
+            if (options.onOk) options.onOk();
+            hideModal();
+        };
+        modalActions.appendChild(okBtn);
+    }
+    
+    if (options.type === 'alert') {
+         const okBtn = document.createElement('button');
+        okBtn.textContent = 'OK';
+        okBtn.className = 'btn-primary font-bold py-2 px-4 rounded-lg';
+        okBtn.onclick = hideModal;
+        modalActions.appendChild(okBtn);
+    }
+
+    const cancelBtn = document.createElement('button');
+    cancelBtn.textContent = (options.type === 'confirm') ? 'Tidak' : 'Batal';
+    cancelBtn.className = 'bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded-lg';
+    cancelBtn.onclick = () => {
+        if (options.onCancel) options.onCancel();
+        hideModal();
+    };
+    if (options.type !== 'alert') {
+        modalActions.appendChild(cancelBtn);
+    }
+    
+    modalOverlay.classList.remove('hidden');
+    if (options.type === 'prompt') modalInput.focus();
+}
+
+
+// EVENT LISTENER
+document.addEventListener('DOMContentLoaded', () => {
+    modalCloseBtn.addEventListener('click', hideModal);
+    document.getElementById('live-date').textContent = new Date().toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+
+    const tabs = document.querySelectorAll('.tab-btn');
+    const views = document.querySelectorAll('main');
+    views.forEach(view => view.classList.add('hidden'));
+    document.getElementById('view-form').classList.remove('hidden');
 
     tabs.forEach(tab => {
-        tab.btn.addEventListener('click', () => {
-            tabs.forEach(otherTab => {
-                otherTab.view.style.display = 'none';
-                otherTab.btn.classList.remove('active');
-            });
-            tab.view.style.display = 'block';
-            tab.btn.classList.add('active');
+        tab.addEventListener('click', () => {
+            tabs.forEach(t => t.classList.remove('active'));
+            tab.classList.add('active');
+            views.forEach(view => view.classList.add('hidden'));
+            const targetView = document.getElementById(tab.id.replace('tab-', 'view-'));
+            if(targetView) targetView.classList.remove('hidden');
+            if(tab.id === 'tab-rekap') renderHasil();
         });
     });
 
-    // Form Input Logic with Confirmation
-    const addDataForm = document.getElementById('add-data-form');
-    const formBidang = document.getElementById('form-bidang');
-    const saveConfirmModal = document.getElementById('save-confirm-modal');
-    const confirmSaveBtn = document.getElementById('confirm-save');
-    const cancelSaveBtn = document.getElementById('cancel-save');
+    const barangSelect = document.getElementById("barang");
+    const opsiTipeLengan = document.getElementById("opsi-tipe-lengan");
+    const opsiUkuran = document.getElementById("opsi-ukuran");
 
-    dataCols.forEach(colName => {
-        formBidang.innerHTML += `<option value="${colName}">${colName}</option>`;
+    function toggleFormOptions() {
+        const selectedBarang = barangSelect.value;
+        opsiTipeLengan.classList.toggle('hidden', selectedBarang !== 'Kaos');
+        opsiUkuran.classList.toggle('hidden', !BARANG_PAKAI_UKURAN.includes(selectedBarang));
+    }
+    barangSelect.addEventListener('change', toggleFormOptions);
+    toggleFormOptions();
+
+    document.getElementById("form-input").addEventListener("submit", e => {
+      e.preventDefault();
+      const pesanan = getPesanan();
+      const newItem = {
+          id: Date.now() + Math.random(),
+          nama: document.getElementById("nama").value.trim(),
+          barang: document.getElementById("barang").value,
+          tipeLengan: document.getElementById("tipe-lengan").value,
+          ukuran: document.getElementById("ukuran").value,
+          jumlah: parseInt(document.getElementById("jumlah").value) || 1,
+          tanggal: formatTanggal(new Date())
+      };
+
+      const keyGenerator = (item) => [
+          item.nama.toLowerCase(), item.barang,
+          BARANG_PAKAI_UKURAN.includes(item.barang) ? item.ukuran : 'no-size',
+          item.barang === 'Kaos' ? item.tipeLengan : 'no-sleeve'
+      ].join('-');
+
+      const newItemKey = keyGenerator(newItem);
+      const existingIndex = pesanan.findIndex(p => keyGenerator(p) === newItemKey);
+
+      if (existingIndex > -1) {
+        pesanan[existingIndex].jumlah += newItem.jumlah;
+        pesanan[existingIndex].tanggal = newItem.tanggal;
+        showModal({ type: 'alert', title: 'Berhasil', message: 'Jumlah pesanan untuk item yang sama berhasil diperbarui!' });
+      } else {
+        pesanan.push(newItem);
+        showModal({ type: 'alert', title: 'Berhasil', message: 'Pesanan baru berhasil ditambahkan!' });
+      }
+      
+      setPesanan(pesanan);
+      e.target.reset();
+      toggleFormOptions();
+      document.getElementById("nama").focus();
     });
+    
+    document.getElementById("tabel-hasil").addEventListener('click', function(e) {
+        const target = e.target.closest('button');
+        if (!target) return;
 
-    addDataForm.addEventListener('submit', (e) => {
-        e.preventDefault();
-        const jumlah = document.getElementById('form-jumlah').value;
-        if (!jumlah || jumlah < 1) { alert('Mohon isi jumlah pesanan.'); return; }
-
-        document.getElementById('confirm-bidang').textContent = document.getElementById('form-bidang').value;
-        document.getElementById('confirm-ukuran').textContent = document.getElementById('form-ukuran').value;
-        document.getElementById('confirm-tipe').textContent = document.getElementById('form-tipe').value;
-        document.getElementById('confirm-jumlah').textContent = jumlah;
+        if (target.classList.contains('edit-item-btn')) {
+            const itemId = parseFloat(target.getAttribute('data-id'));
+            const pesanan = getPesanan();
+            const itemToEdit = pesanan.find(p => p.id === itemId);
+            if (!itemToEdit) return;
+            
+            showModal({
+                type: 'prompt',
+                title: 'Ubah Jumlah Pesanan',
+                message: `Masukkan jumlah baru untuk ${itemToEdit.barang}:`,
+                defaultValue: itemToEdit.jumlah,
+                onOk: (newQuantityStr) => {
+                    const newQuantity = parseInt(newQuantityStr);
+                    if (!isNaN(newQuantity) && newQuantity > 0) {
+                        itemToEdit.jumlah = newQuantity;
+                        itemToEdit.tanggal = formatTanggal(new Date());
+                        setPesanan(pesanan);
+                        renderHasil();
+                    } else {
+                        showModal({ type: 'alert', title: 'Gagal', message: 'Jumlah tidak valid. Harap masukkan angka lebih dari 0.' });
+                    }
+                }
+            });
+        }
         
-        saveConfirmModal.style.display = 'flex';
-    });
-
-    cancelSaveBtn.addEventListener('click', () => {
-        saveConfirmModal.style.display = 'none';
-    });
-
-    confirmSaveBtn.addEventListener('click', () => {
-        const bidang = document.getElementById('confirm-bidang').textContent;
-        const ukuran = document.getElementById('confirm-ukuran').textContent;
-        const tipe = document.getElementById('confirm-tipe').textContent;
-        const jumlah = document.getElementById('confirm-jumlah').textContent;
-
-        const colIndex = dataCols.indexOf(bidang);
-        const cellId = `cell-${ukuran}-${tipe}-${colIndex}`;
-        const targetCell = document.getElementById(cellId);
+        if (target.classList.contains('delete-item-btn')) {
+            const itemId = parseFloat(target.getAttribute('data-id'));
+            showModal({
+                type: 'confirm',
+                title: 'Konfirmasi Hapus',
+                message: 'Anda yakin ingin menghapus item ini?',
+                onOk: () => {
+                    let pesanan = getPesanan();
+                    pesanan = pesanan.filter(p => p.id !== itemId);
+                    setPesanan(pesanan);
+                    renderHasil();
+                }
+            });
+        }
         
-        if (targetCell) {
-            targetCell.value = (parseInt(targetCell.value) || 0) + parseInt(jumlah);
-            calculateTotals();
-            addDataForm.reset();
-            saveConfirmModal.style.display = 'none';
-            const toast = document.getElementById('success-toast');
-            toast.style.display = 'block';
-            setTimeout(() => { toast.style.display = 'none'; }, 2000);
+        if (target.classList.contains('delete-group-btn')) {
+            const groupName = target.getAttribute('data-name');
+            showModal({
+                type: 'confirm',
+                title: 'Konfirmasi Hapus',
+                message: `Anda yakin ingin menghapus semua pesanan atas nama "${groupName}"?`,
+                onOk: () => {
+                    let pesanan = getPesanan();
+                    pesanan = pesanan.filter(p => p.nama.toLowerCase() !== groupName.toLowerCase());
+                    setPesanan(pesanan);
+                    renderHasil();
+                }
+            });
         }
     });
 
-    // Other Modals Logic (Clear, WhatsApp)
-    const clearDataBtn = document.getElementById('clear-data-btn');
-    const confirmModal = document.getElementById('confirm-modal');
-    const cancelClearBtn = document.getElementById('cancel-clear');
-    const confirmClearBtn = document.getElementById('confirm-clear');
-    clearDataBtn.addEventListener('click', () => { confirmModal.style.display = 'flex'; });
-    cancelClearBtn.addEventListener('click', () => { confirmModal.style.display = 'none'; });
-    confirmClearBtn.addEventListener('click', () => {
-        document.querySelectorAll('.data-input').forEach(input => { input.value = ''; });
-        calculateTotals();
-        confirmModal.style.display = 'none';
-    });
-    const printBtn = document.getElementById('print-btn');
-    const whatsappBtn = document.getElementById('whatsapp-btn');
-    const whatsappModal = document.getElementById('whatsapp-modal');
-    const closeWhatsappModalBtn = document.getElementById('close-whatsapp-modal');
-    const modalPrintBtn = document.getElementById('modal-print-btn');
-    printBtn.addEventListener('click', () => window.print());
-    modalPrintBtn.addEventListener('click', () => window.print());
-    whatsappBtn.addEventListener('click', () => { whatsappModal.style.display = 'flex'; });
-    closeWhatsappModalBtn.addEventListener('click', () => { whatsappModal.style.display = 'none'; });
-    
-    window.addEventListener('click', (event) => {
-        if (event.target == confirmModal) { confirmModal.style.display = "none"; }
-        if (event.target == whatsappModal) { whatsappModal.style.display = "none"; }
-        if (event.target == saveConfirmModal) { saveConfirmModal.style.display = "none"; }
+    document.getElementById("email-btn").addEventListener("click", () => {
+        const emailTo = "kustomofamily@gmail.com";
+        const subject = "Rekapitulasi Pesanan Baru";
+        const body = generateEmailBody();
+        window.location.href = `mailto:${emailTo}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
     });
 
-    // Live Date and Time
-    function updateDateTime() {
-        const now = new Date();
-        const days = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
-        const months = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
-        const timeString = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}`;
-        const dateString = `${days[now.getDay()]}, ${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()}`;
-        document.getElementById('live-time').textContent = timeString;
-        document.getElementById('live-date').textContent = dateString;
-    }
-    updateDateTime();
-    setInterval(updateDateTime, 1000);
+    document.getElementById("cetak").addEventListener("click", () => window.print());
+    document.getElementById("clear").addEventListener("click", () => {
+        showModal({
+            type: 'confirm',
+            title: 'Konfirmasi',
+            message: 'Anda yakin ingin mengosongkan seluruh data pesanan?',
+            onOk: () => {
+                setPesanan([]);
+                renderHasil();
+            }
+        });
+    });
 });
