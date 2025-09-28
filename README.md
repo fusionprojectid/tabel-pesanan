@@ -73,7 +73,15 @@ Tujuan utamanya adalah untuk menggantikan pencatatan manual, mengurangi kesalaha
 
 Proyek ini disusun dengan memisahkan antara struktur, gaya, logika, dan data untuk kemudahan pengelolaan.
 
-/├── index.html       # File HTML utama yang berisi struktur halaman.├── style.css        # File CSS kustom untuk styling dan theming (terang/gelap).├── script.js        # File JavaScript utama yang berisi semua logika aplikasi.├── prices.json      # File data JSON yang menyimpan semua informasi harga barang.└── /assets/         # Folder untuk aset seperti logo (logo-warna.png, logo-bw.png).
+
+/
+├── index.html       # File HTML utama yang berisi struktur halaman.
+├── style.css        # File CSS kustom untuk styling dan theming (terang/gelap).
+├── script.js        # File JavaScript utama yang berisi semua logika aplikasi.
+├── prices.json      # File data JSON yang menyimpan semua informasi harga barang.
+└── /assets/         # Folder untuk aset seperti logo (logo-warna.png, logo-bw.png).
+
+
 ---
 
 ## Instalasi dan Penggunaan
@@ -108,4 +116,3 @@ Aplikasi menggunakan `localStorage` browser untuk persistensi data.
 
 -   **Pengembang**: ArkIntelligent ([Facebook](https://www.facebook.com/artcow))
 -   **Pemilik Proyek**: Tritunggal Lancar ([Instagram](https://www.instagram.com/ttl_workshop/))
-
