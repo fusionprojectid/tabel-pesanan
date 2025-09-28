@@ -3,7 +3,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // STEP 1: DEKLARASI VARIABEL GLOBAL, KONSTANTA, & STATE
     let HARGA_BARANG = {};
-    const GOOGLE_SHEET_URL = 'https://script.google.com/macros/s/AKfycbxlX4Il3_DFtVEbIK2gEBku5vZ2ZPEk7FTebaZq1kqMe54lWhs9RYaVVaxzX7mqlKBn/exec';
+    const GOOGLE_SHEET_URL = 'https://script.google.com/macros/s/AKfycbyorAWsuMrzUsYm5_nb4ffYJWtm3zIbfOwHBF2UOMLUA07_G8nePczI2_It4ywpBL_p/exec';
     const BARANG_PAKAI_UKURAN = ['Kaos', 'Kaos Polo', 'Jaket Hoodie', 'Jaket Gunung', 'PDL', 'Kaos Kaki'];
     let currentSort = { column: 'nama', order: 'asc' };
     let currentFilter = 'Semua';
@@ -105,10 +105,16 @@ document.addEventListener('DOMContentLoaded', async () => {
     const formatRupiah = (angka) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(angka);
     const loadPrices = async () => {
         try {
-            const response = await fetch('prices.json');
+            const response = await fetch(`${GOOGLE_SHEET_URL}?action=getPrices`);
+            if (!response.ok) throw new Error('Gagal mengambil daftar harga dari Google Sheet.');
             HARGA_BARANG = await response.json();
+            console.log("Daftar harga berhasil dimuat dari Google Sheet.");
         } catch (error) {
-            console.error('Gagal memuat harga:', error);
+            console.error('Gagal memuat harga dari Google Sheet:', error);
+            await showModal({
+                title: 'Koneksi Gagal',
+                message: 'Tidak dapat mengambil daftar harga terbaru dari Google Sheet. Aplikasi mungkin tidak berfungsi dengan benar.',
+            });
         }
     };
     const saveDraft = (data) => localStorage.setItem('pesananDraft', JSON.stringify(data));
@@ -646,8 +652,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     // STEP 5: INISIALISASI APLIKASI
     const initializeApp = async () => {
         initializeTheme();
-        // Ganti loadPrices dengan loadDataFromSheet
-        await loadDataFromSheet(); 
+        await loadPrices(); // Kembali menggunakan loadPrices yang hanya mengambil dari Google Sheet
         setActiveView('form');
         toggleFormOptions();
         updateLivePriceDisplay();
