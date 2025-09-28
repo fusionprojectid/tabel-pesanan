@@ -15,6 +15,7 @@
   <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.23/jspdf.plugin.autotable.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -42,6 +43,10 @@
                     <svg class="w-6 h-6 mr-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
                     <span>Rekapitulasi Hasil</span>
                 </button>
+                <button data-tab="statistik" class="sidebar-btn w-full flex items-center p-3 rounded-lg text-left text-[--text-secondary] hover:bg-[--bg-primary] transition-colors duration-200">
+                    <svg class="w-6 h-6 mr-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
+                    <span>Statistik Visual</span>
+                </button>
                 <button data-tab="kontak" class="sidebar-btn w-full flex items-center p-3 rounded-lg text-left text-[--text-secondary] hover:bg-[--bg-primary] transition-colors duration-200">
                     <svg class="w-6 h-6 mr-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
                     <span>Lokasi & Kontak</span>
@@ -60,7 +65,7 @@
         <img src="assets/logo-bw.png" alt="Logo Perusahaan" class="h-12 w-auto" onerror="this.style.display='none'; this.onerror=null;">
     </header>
 
-    <div class="bg-[--bg-secondary] flex-grow max-w-7xl mx-auto w-full p-6">
+    <div class="bg-[--bg-secondary] flex-grow max-w-7xl mx-auto w-full p-6 mt-12 mb-12 rounded-xl shadow-lg">
         <div class="flex items-center mb-6 no-print">
             <button id="hamburger-btn" class="p-2 rounded-md text-text-primary">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
@@ -68,7 +73,7 @@
             <div class="flex-grow text-center">
                 <h1 class="text-2xl sm:text-3xl font-bold text-[--brand-dark]">Formulir Pesanan</h1>
                 <p id="live-date" class="text-sm font-semibold text-text-secondary"></p>
-                <p class="text-xs text-text-secondary mt-1">Versi Aplikasi 3.9.64</p>
+                <p class="text-xs text-text-secondary mt-1">Versi Aplikasi 4.1.1</p>
             </div>
             <div class="w-10"></div> </div>
 
@@ -76,6 +81,7 @@
             <div class="flex flex-wrap justify-center sm:justify-start gap-x-4">
                 <button id="tab-form" class="tab-btn py-3 px-4 text-[--text-secondary]">Input Pesanan</button>
                 <button id="tab-rekap" class="tab-btn py-3 px-4 text-[--text-secondary]">Rekapitulasi Hasil</button>
+                <button id="tab-statistik" class="tab-btn py-3 px-4 text-[--text-secondary]">Statistik Visual</button>
                 <button id="tab-kontak" class="tab-btn py-3 px-4 text-[--text-secondary]">Lokasi & Kontak</button>
             </div>
         </nav>
@@ -88,7 +94,6 @@
                         <label for="nama" class="block text-sm font-medium text-text-secondary">Nama Pemesan</label>
                         <input type="text" id="nama" class="mt-1 block w-full py-2 px-3 border border-[--border-primary] rounded-md shadow-sm focus:outline-none focus:ring-brand-primary focus:border-brand-primary sm:text-sm bg-[--bg-secondary] text-[--text-primary]" required/>
                     </div>
-                    
                     <div>
                         <label for="barang" class="block text-sm font-medium text-text-secondary">Jenis Barang</label>
                         <select id="barang" class="mt-1 block w-full py-2 px-3 border border-[--border-primary] bg-inherit rounded-md shadow-sm focus:outline-none focus:ring-brand-primary focus:border-brand-primary sm:text-sm bg-[--bg-secondary] text-[--text-primary]" required>
@@ -106,7 +111,6 @@
                             <option>Topi</option>
                         </select>
                     </div>
-
                     <div class="space-y-4">
                       <div id="opsi-bahan-polo" class="hidden">
                         <label for="bahan-polo" class="block text-sm font-medium text-text-secondary">Bahan Kaos Polo</label>
@@ -117,7 +121,6 @@
                           <option>Katun Combed 24s, Sablon</option>
                         </select>
                       </div>
-                      
                       <div id="opsi-bahan-topi" class="hidden">
                         <label for="bahan-topi" class="block text-sm font-medium text-text-secondary">Bahan Topi</label>
                         <select id="bahan-topi" class="mt-1 block w-full py-2 px-3 border border-[--border-primary] bg-inherit rounded-md shadow-sm focus:outline-none focus:ring-brand-primary focus:border-brand-primary sm:text-sm bg-[--bg-secondary] text-[--text-primary]">
@@ -126,7 +129,6 @@
                           <option>Dril</option>
                         </select>
                       </div>
-
                       <div class="grid grid-cols-2 gap-4">
                         <div id="opsi-tipe-lengan" class="hidden">
                           <label for="tipe-lengan" class="block text-sm font-medium text-text-secondary">Tipe Lengan</label>
@@ -145,22 +147,19 @@
                         </div>
                       </div>
                     </div>
-
                     <div>
                         <label for="jumlah" class="block text-sm font-medium text-text-secondary">Jumlah Pesanan</label>
                         <input type="number" id="jumlah" min="1" value="1" class="mt-1 block w-full py-2 px-3 border border-[--border-primary] rounded-md shadow-sm focus:outline-none focus:ring-brand-primary focus:border-brand-primary sm:text-sm bg-[--bg-secondary] text-[--text-primary]" required/>
                     </div>
-
                     <div id="live-price-display" class="pt-2 text-right hidden">
                         <p class="text-sm text-text-secondary">Harga Satuan: 
                             <span id="harga-satuan-display" class="font-bold text-lg text-[--brand-dark]">Rp0</span>
                         </p>
                     </div>
-                    
                     <div class="pt-4 flex justify-end">
-                        <button type="submit" class="bg-[--brand-primary] text-[#4b271b] font-bold py-2 px-4 rounded-lg flex items-center transition-colors hover:bg-[--brand-secondary] hover:text-white">
+                        <button type="submit" id="submit-btn" class="bg-[--brand-primary] text-[#4b271b] font-bold py-2 px-4 rounded-lg flex items-center transition-colors hover:bg-[--brand-secondary] hover:text-white disabled:opacity-50 disabled:cursor-wait">
                             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                            Simpan Pesanan
+                            <span id="submit-btn-text">Simpan Pesanan</span>
                         </button>
                     </div>
                 </form>
@@ -168,9 +167,17 @@
         </main>
 
         <div id="view-rekap" class="hidden view-container">
-            <div class="mb-4">
-                <label for="search-rekap" class="sr-only">Cari Pesanan</label>
-                <input type="text" id="search-rekap" placeholder="Cari berdasarkan nama atau barang..." class="w-full py-2 px-4 border border-[--border-primary] rounded-md shadow-sm focus:outline-none focus:ring-brand-primary focus:border-brand-primary bg-[--bg-secondary] text-[--text-primary]">
+            <div class="flex flex-col md:flex-row gap-4 mb-4">
+                <input type="text" id="search-rekap" placeholder="Cari berdasarkan nama atau barang..." class="w-full md:flex-grow py-2 px-4 border border-[--border-primary] rounded-md shadow-sm focus:outline-none focus:ring-brand-primary focus:border-brand-primary bg-[--bg-secondary] text-[--text-primary]">
+                <div class="flex-shrink-0">
+                    <label for="filter-select" class="sr-only">Filter Kategori</label>
+                    <select id="filter-select" class="py-2 px-4 border border-[--border-primary] rounded-md shadow-sm focus:outline-none focus:ring-brand-primary focus:border-brand-primary bg-[--bg-secondary] text-[--text-primary]">
+                        <option value="Semua">Semua Kategori</option>
+                        <option value="Kaos">Hanya Kaos</option>
+                        <option value="Jaket">Hanya Jaket</option>
+                        <option value="Merchandise">Hanya Merchandise</option>
+                    </select>
+                </div>
             </div>
             
             <div class="overflow-x-auto rounded-lg shadow-md border border-[--border-primary]">
@@ -178,12 +185,12 @@
                 <thead class="text-center font-medium">
                   <tr>
                     <th class="bg-[--bg-header] text-[--text-header] p-3">#</th>
-                    <th class="bg-[--bg-header] text-[--text-header] p-3">Nama Pemesan</th>
-                    <th class="bg-[--bg-header] text-[--text-header] p-3">Barang</th>
+                    <th class="sortable bg-[--bg-header] text-[--text-header] p-3 cursor-pointer" data-sort="nama">Nama Pemesan <span class="sort-indicator"></span></th>
+                    <th class="sortable bg-[--bg-header] text-[--text-header] p-3 cursor-pointer" data-sort="barang">Barang <span class="sort-indicator"></span></th>
                     <th class="bg-[--bg-header] text-[--text-header] p-3">Detail</th>
-                    <th class="bg-[--bg-header] text-[--text-header] p-3">Jumlah</th>
+                    <th class="sortable bg-[--bg-header] text-[--text-header] p-3 cursor-pointer" data-sort="jumlah">Jumlah <span class="sort-indicator"></span></th>
                     <th class="bg-[--bg-header] text-[--text-header] p-3">Harga Satuan</th>
-                    <th class="bg-[--bg-header] text-[--text-header] p-3">Subtotal</th>
+                    <th class="sortable bg-[--bg-header] text-[--text-header] p-3 cursor-pointer" data-sort="subtotal">Subtotal <span class="sort-indicator"></span></th>
                     <th class="bg-[--bg-header] text-[--text-header] p-3">Aksi</th>
                   </tr>
                 </thead>
@@ -197,7 +204,7 @@
               </table>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mt-8" id="rekap"></div>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mt-8" id="rekap"></div>
 
             <div class="mt-8 pt-6 border-t border-[--border-primary] flex flex-wrap justify-center gap-3 no-print">
                  <button id="wa-btn" class="bg-[#22c55e] hover:bg-[#16a34a] text-white font-bold py-2 px-4 rounded-lg flex items-center transition-colors"><svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91C2.13 13.66 2.59 15.36 3.45 16.86L2.05 22L7.31 20.62C8.75 21.41 10.36 21.82 12.04 21.82C17.5 21.82 21.95 17.37 21.95 11.91C21.95 9.27 20.92 6.78 19.05 4.91C17.18 3.03 14.69 2 12.04 2ZM12.04 3.67C14.24 3.67 16.3 4.5 17.82 6.02C19.34 7.54 20.18 9.6 20.18 11.8C20.18 16.42 16.52 20.1 11.93 20.1C10.42 20.1 8.96 19.67 7.74 18.89L7.42 18.7L4.29 19.53L5.15 16.51L4.95 16.18C4.09 14.88 3.67 13.38 3.67 11.8C3.67 7.18 7.33 3.53 11.93 3.53L12.04 3.67ZM9.11 7.23C8.91 7.23 8.72 7.23 8.53 7.23C8.28 7.23 8.01 7.31 7.77 7.55C7.53 7.79 6.91 8.34 6.91 9.49C6.91 10.64 7.79 11.75 7.94 11.93C8.09 12.11 9.53 14.43 11.83 15.36C13.63 16.08 14.13 15.86 14.48 15.81C15.06 15.71 15.91 15.19 16.14 14.59C16.37 13.99 16.37 13.49 16.3 13.38C16.23 13.27 16.08 13.22 15.85 13.11C15.62 13 14.51 12.45 14.28 12.36C14.05 12.28 13.89 12.23 13.74 12.41C13.59 12.59 13.08 13.16 12.93 13.34C12.78 13.52 12.63 13.54 12.39 13.43C11.6 13.05 10.47 12.45 9.62 11.24C9.01 10.36 8.65 9.59 8.53 9.37C8.41 9.15 8.52 9.04 8.64 8.92C8.75 8.81 8.88 8.65 9.01 8.52C9.14 8.39 9.19 8.28 9.27 8.11C9.35 7.94 9.3 7.79 9.25 7.68C9.2 7.57 8.72 6.36 8.72 6.36C8.52 5.91 8.52 5.91 8.52 5.91C8.32 5.91 8.12 5.91 7.92 5.91L7.72 5.91C7.52 5.91 7.25 5.99 7.02 6.22C6.79 6.45 6.18 6.99 6.18 8.14C6.18 9.29 7.06 10.4 7.21 10.58C7.36 10.76 8.8 13.08 11.1 14.01C11.75 14.31 12.3 14.48 12.74 14.6C13.28 14.74 13.9 14.71 14.36 14.46C14.88 14.18 15.71 13.58 15.96 12.96C16.21 12.34 16.21 11.84 16.14 11.73C16.07 11.62 15.92 11.57 15.69 11.46C15.46 11.35 14.35 10.8 14.12 10.71C13.89 10.63 13.73 10.58 13.58 10.76C13.43 10.94 12.92 11.51 12.77 11.69C12.62 11.87 12.47 11.89 12.23 11.78C11.99 11.67 11.06 11.35 10.05 10.47C9.29 9.82 8.79 9.06 8.67 8.84C8.55 8.62 8.66 8.51 8.78 8.39C8.89 8.28 9.02 8.12 9.15 7.99C9.28 7.86 9.33 7.75 9.41 7.58C9.49 7.41 9.44 7.26 9.39 7.15C9.34 7.04 9.11 7.23 9.11 7.23Z"></path></svg>Kirim via WhatsApp</button>
@@ -205,6 +212,24 @@
                  <button id="email-btn" class="bg-[#2563eb] hover:bg-[#1d4ed8] text-white font-bold py-2 px-4 rounded-lg flex items-center transition-colors"><svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>Kirim via Email</button>
                  <button id="export-pdf-btn" class="bg-[#4f46e5] hover:bg-[#4338ca] text-white font-bold py-2 px-4 rounded-lg flex items-center transition-colors"><svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>Simpan PDF</button>
                  <button id="clear" class="bg-[#ef4444] hover:bg-[#dc2626] text-white font-bold py-2 px-4 rounded-lg flex items-center transition-colors"><svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>Kosongkan Data</button>
+            </div>
+        </div>
+        
+        <div id="view-statistik" class="hidden view-container">
+            <h2 class="text-xl font-bold mb-6 text-[--brand-dark]">Statistik Pesanan</h2>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <div class="bg-[--bg-secondary] border border-[--border-primary] p-6 rounded-lg shadow-md">
+                    <h3 class="font-semibold mb-4 text-center">Barang Paling Banyak Dipesan</h3>
+                    <div class="h-96">
+                        <canvas id="chart-barang-terlaris"></canvas>
+                    </div>
+                </div>
+                <div class="bg-[--bg-secondary] border border-[--border-primary] p-6 rounded-lg shadow-md">
+                    <h3 class="font-semibold mb-4 text-center">Statistik Lain (Segera Hadir)</h3>
+                    <div class="flex items-center justify-center h-full text-text-secondary">
+                        <p>Grafik omzet penjualan akan tersedia di sini.</p>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -249,7 +274,7 @@
                     </div>
                 </div>
                 <div class="rounded-lg shadow-md overflow-hidden">
-                    <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3951.488395782946!2d112.67017861477908!3d-7.948332994273311!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2dd629b137357591%3A0xa190533513a1b025!2sTritunggal%20Lancar%20(Pusat%20Sablon%20Kaos)!5e0!3m2!1sen!2sid!4v1695227757539!5m2!1sen!2sid" width="100%" height="100%" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+                    <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3951.666991395226!2d112.6844323147789!3d-7.92965399428587!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2dd62bf0a5382377%3A0x2820543e06a88e99!2sTRITUNGGAL%20LANCAR%20(TTL%20WORKSHOP)!5e0!3m2!1sen!2sid!4v1663152399238!5m2!1sen!2sid" width="100%" height="100%" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
                 </div>
             </div>
         </div>
@@ -266,7 +291,7 @@
             <div id="modal-actions" class="flex justify-end gap-3 mt-4"></div>
         </div>
     </div>
-
+    
     <footer class="no-print mt-auto text-white bg-[--bg-footer-main]">
         <div class="max-w-6xl mx-auto p-8 text-sm">
     
@@ -282,8 +307,8 @@
                         <strong>Tritunggal Lancar (TTL)</strong> adalah pusat sablon kaos grosir maupun eceran dengan layanan berkualitas. Kami melayani berbagai kebutuhan, antara lain:
                         <ul class="list-disc ml-6">
                             <li>Berbagai Sablon (grosir dan eceran)</li>
-                            <li>Berbagai Merchandise &amp;  Souvenir</li>
-                            <li>Foto &amp; Videografi</li>
+                            <li>Berbagai Merchandise &  Souvenir</li>
+                            <li>Foto & Videografi</li>
                         </ul>
                     </p>
                 </div>
