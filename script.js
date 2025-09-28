@@ -1,17 +1,26 @@
 // KONSTANTA & DATA HARGA
 const HARGA_BARANG = {
+    // Harga Kaos Biasa
     'Kaos': 85000,
+    
+    // Harga dasar Kaos Polo berdasarkan bahan
+    'Lacoste, Sablon': 95000,
+    'Lacoste, Bordir': 105000,
+    'Katun Combed 24s, Sablon': 85000,
+
+    // Harga barang lain
     'Jaket Hoodie': 150000,
     'Jaket Gunung': 250000,
+    'PDL': 185000,
+    'Topi (Bahan Rafael)': 55000,
+    'Kaos Kaki': 0, // Harga belum ditentukan
+    'Pin (4.4mm)': 8000,
     'Gantungan Kunci': 8000,
     'Pulpen': 8000,
     'Block Note': 8000,
-    'PDL': 185000, // Harga asumsi
-    'Topi': 45000,   // Harga asumsi
 };
-const BARANG_PAKAI_UKURAN = ['Kaos', 'Jaket Hoodie', 'Jaket Gunung', 'PDL', 'Topi'];
-const UKURAN_BIAYA_TAMBAHAN = ['XXL', 'XXXL'];
-const BIAYA_TAMBAHAN = 10000;
+const BARANG_PAKAI_UKURAN = ['Kaos', 'Kaos Polo', 'Jaket Hoodie', 'Jaket Gunung', 'PDL', 'Kaos Kaki'];
+const UKURAN_BIAYA_TAMBAHAN_UMUM = ['XXL', 'XXXL'];
 
 // FUNGSI HELPER
 function formatRupiah(n) { return "Rp" + new Intl.NumberFormat("id-ID").format(n); }
@@ -20,23 +29,32 @@ function setPesanan(data) { localStorage.setItem("pesananKaos", JSON.stringify(d
 function formatTanggal(date) { return date.toLocaleString("id-ID", { year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit" }); }
 
 function hitungHargaSatuan(item) {
-    let harga = HARGA_BARANG[item.barang] || 0;
-    if (item.barang === 'Kaos') {
-        if (item.tipeLengan === 'Panjang') {
-            harga += BIAYA_TAMBAHAN;
-        }
-        if (UKURAN_BIAYA_TAMBAHAN.includes(item.ukuran)) {
-            harga += BIAYA_TAMBAHAN;
-        }
-    }
-    return harga;
-}
+    let harga = 0;
 
-function hitungDiskon(jumlah) {
-  if (jumlah >= 500) return 0.5;
-  if (jumlah >= 100) return 0.25;
-  if (jumlah >= 50) return 0.1;
-  return 0;
+    if (item.barang === 'Kaos Polo') {
+        harga = HARGA_BARANG[item.bahanPolo] || 0;
+        // Cek biaya tambahan ukuran untuk Kaos Polo
+        if (UKURAN_BIAYA_TAMBAHAN_UMUM.includes(item.ukuran)) {
+            if (item.bahanPolo.includes('Lacoste')) {
+                harga += 10000; // Biaya tambahan Lacoste
+            } else if (item.bahanPolo.includes('Katun')) {
+                harga += 7000; // Biaya tambahan Katun
+            }
+        }
+    } else if (item.barang === 'Kaos') {
+        harga = HARGA_BARANG[item.barang] || 0;
+        // Cek biaya tambahan lengan & ukuran untuk Kaos biasa
+        if (item.tipeLengan === 'Panjang') {
+            harga += 10000;
+        }
+        if (UKURAN_BIAYA_TAMBAHAN_UMUM.includes(item.ukuran)) {
+            harga += 10000;
+        }
+    } else {
+        harga = HARGA_BARANG[item.barang] || 0;
+    }
+    
+    return harga;
 }
 
 function generateEmailBody() {
@@ -54,30 +72,29 @@ function generateEmailBody() {
         body += `NAMA PEMESAN: ${group[0].nama}\n`;
         body += `--------------------------------\n`;
 
-        let totalPerNamaSetelahDiskon = 0;
+        let totalPerNama = 0;
 
         group.forEach(p => {
             const hargaSatuan = hitungHargaSatuan(p);
-            const subtotalOriginal = hargaSatuan * p.jumlah;
-            const diskonRate = hitungDiskon(p.jumlah);
-            const diskonAmount = subtotalOriginal * diskonRate;
-            const subtotalFinal = subtotalOriginal - diskonAmount;
-            totalPerNamaSetelahDiskon += subtotalFinal;
+            const subtotal = hargaSatuan * p.jumlah;
+            totalPerNama += subtotal;
             
             let detail = p.barang;
-            if (BARANG_PAKAI_UKURAN.includes(p.barang)) detail += ` (${p.ukuran})`;
-            if (p.barang === 'Kaos') detail += `, ${p.tipeLengan}`;
-            
-            body += `${p.jumlah}x ${detail} @ ${formatRupiah(hargaSatuan)} = ${formatRupiah(subtotalOriginal)}\n`;
-            if (diskonAmount > 0) {
-                body += `  (Diskon ${diskonRate * 100}%: -${formatRupiah(diskonAmount)})\n`;
+            if (p.barang === 'Kaos Polo') {
+                detail += ` (${p.bahanPolo}, ${p.ukuran})`;
+            } else if (p.barang === 'Kaos') {
+                detail += ` (${p.tipeLengan}, ${p.ukuran})`;
+            } else if (BARANG_PAKAI_UKURAN.includes(p.barang)) {
+                detail += ` (${p.ukuran})`;
             }
+            
+            body += `${p.jumlah}x ${detail} @ ${formatRupiah(hargaSatuan)} = ${formatRupiah(subtotal)}\n`;
         });
         
-        grandTotalAkhir += totalPerNamaSetelahDiskon;
+        grandTotalAkhir += totalPerNama;
 
         body += `--------------------------------\n`;
-        body += `TOTAL: ${formatRupiah(totalPerNamaSetelahDiskon)}\n\n`;
+        body += `TOTAL: ${formatRupiah(totalPerNama)}\n\n`;
     });
     
     body += `================================\n`;
@@ -97,29 +114,28 @@ function renderHasil() {
   const grup = {};
   pesanan.forEach(p => { (grup[p.nama.toLowerCase()] = grup[p.nama.toLowerCase()] || []).push(p); });
 
-  let grandTotalSebelumDiskon = 0, grandTotalDiskon = 0, grandTotalSetelahDiskon = 0;
+  let grandTotal = 0;
   const itemCounts = {};
   let i = 1;
 
   Object.values(grup).forEach(group => {
-    let namaTotalSebelumDiskon = 0, namaTotalDiskon = 0, namaTotalSetelahDiskon = 0;
+    let namaTotal = 0;
 
     group.forEach((p, idx) => {
       const hargaSatuan = hitungHargaSatuan(p);
-      const subtotalOriginal = hargaSatuan * p.jumlah;
-      const diskonRate = hitungDiskon(p.jumlah);
-      const diskonAmount = subtotalOriginal * diskonRate;
-      const subtotalFinal = subtotalOriginal - diskonAmount;
+      const subtotal = hargaSatuan * p.jumlah;
+      namaTotal += subtotal;
 
-      namaTotalSebelumDiskon += subtotalOriginal;
-      namaTotalDiskon += diskonAmount;
-      namaTotalSetelahDiskon += subtotalFinal;
+      const itemCounterKey = p.barang === 'Kaos Polo' ? `${p.barang} - ${p.bahanPolo}` : p.barang;
+      itemCounts[itemCounterKey] = (itemCounts[itemCounterKey] || 0) + p.jumlah;
 
-      itemCounts[p.barang] = (itemCounts[p.barang] || 0) + p.jumlah;
-
-      let detail = p.ukuran || '';
-      if (p.barang === 'Kaos' && p.tipeLengan) {
+      let detail = '-';
+      if (p.barang === 'Kaos Polo') {
+          detail = `${p.bahanPolo}, ${p.ukuran}`;
+      } else if (p.barang === 'Kaos') {
           detail = `${p.tipeLengan}, ${p.ukuran}`;
+      } else if (p.ukuran && BARANG_PAKAI_UKURAN.includes(p.barang)) {
+          detail = p.ukuran;
       }
 
       const tr = document.createElement("tr");
@@ -128,10 +144,10 @@ function renderHasil() {
         <td class="border p-2 text-xs">${i++}</td>
         ${idx === 0 ? `<td class="border p-2 font-semibold text-left align-top" rowspan="${group.length + 1}">${p.nama}</td>` : ""}
         <td class="border p-2 text-left">${p.barang}</td>
-        <td class="border p-2">${detail || '-'}</td>
+        <td class="border p-2 text-left">${detail}</td>
         <td class="border p-2">${p.jumlah}</td>
         <td class="border p-2 money text-right">${formatRupiah(hargaSatuan)}</td>
-        <td class="border p-2 money text-right">${formatRupiah(subtotalOriginal)}</td>
+        <td class="border p-2 money text-right">${formatRupiah(subtotal)}</td>
         <td class="border p-2">
             <div class="flex justify-center items-center space-x-1">
                 <button class="edit-item-btn p-1.5 rounded-full text-gray-500 hover:bg-blue-100 hover:text-blue-600 transition-colors duration-200" data-id="${p.id}" title="Ubah jumlah">
@@ -146,32 +162,22 @@ function renderHasil() {
       tbody.appendChild(tr);
     });
     
-    grandTotalSebelumDiskon += namaTotalSebelumDiskon;
-    grandTotalDiskon += namaTotalDiskon;
-    grandTotalSetelahDiskon += namaTotalSetelahDiskon;
+    grandTotal += namaTotal;
 
     const trTotal = document.createElement("tr");
     trTotal.className = "font-semibold";
     trTotal.style.backgroundColor = 'var(--brand-light)';
     trTotal.innerHTML = `
-      <td colspan="5" class="border p-2 text-right text-sm font-bold" style="color: var(--brand-dark);">
-        Total untuk ${group[0].nama} (Diskon: <span class="font-medium" style="color: var(--brand-secondary);">${formatRupiah(namaTotalDiskon)}</span>)
-      </td>
-      <td class="border p-2 money text-right text-sm font-bold" style="color: var(--brand-dark);">
-          ${formatRupiah(namaTotalSetelahDiskon)}
-      </td>
+      <td colspan="5" class="border p-2 text-right text-sm font-bold" style="color: var(--brand-dark);">Total untuk ${group[0].nama}</td>
+      <td class="border p-2 money text-right text-sm font-bold" style="color: var(--brand-dark);">${formatRupiah(namaTotal)}</td>
       <td class="border p-2 text-center">
-        <button class="delete-group-btn bg-red-100 text-red-700 hover:bg-red-200 text-xs font-semibold px-2 py-1 rounded-md transition-colors" data-name="${group[0].nama}" title="Hapus semua pesanan ${group[0].nama}">
-            Hapus Semua
-        </button>
+        <button class="delete-group-btn bg-red-100 text-red-700 hover:bg-red-200 text-xs font-semibold px-2 py-1 rounded-md transition-colors" data-name="${group[0].nama}" title="Hapus semua pesanan ${group[0].nama}">Hapus Semua</button>
       </td>
     `;
     tbody.appendChild(trTotal);
   });
   
-  document.getElementById("grand-total").textContent = formatRupiah(grandTotalSebelumDiskon);
-  document.getElementById("diskon").textContent = `- ${formatRupiah(grandTotalDiskon)}`;
-  document.getElementById("total-diskon").textContent = formatRupiah(grandTotalSetelahDiskon);
+  document.getElementById("grand-total").textContent = formatRupiah(grandTotal);
   
   let rekapHTML = '';
   for (const barang in itemCounts) {
@@ -193,58 +199,39 @@ const modalInput = document.getElementById('modal-input');
 const modalActions = document.getElementById('modal-actions');
 const modalCloseBtn = document.getElementById('modal-close-btn');
 
-function hideModal() {
-    modalOverlay.classList.add('hidden');
-}
-
+function hideModal() { modalOverlay.classList.add('hidden'); }
 function showModal(options) {
     modalTitle.textContent = options.title || 'Pemberitahuan';
     modalMessage.textContent = options.message || '';
     modalActions.innerHTML = ''; 
-
     modalInput.classList.toggle('hidden', options.type !== 'prompt');
     if (options.type === 'prompt') {
         modalInput.value = options.defaultValue || '';
         const saveBtn = document.createElement('button');
         saveBtn.textContent = 'Simpan';
         saveBtn.className = 'btn-primary font-bold py-2 px-4 rounded-lg';
-        saveBtn.onclick = () => {
-            if (options.onOk) options.onOk(modalInput.value);
-            hideModal();
-        };
+        saveBtn.onclick = () => { if (options.onOk) options.onOk(modalInput.value); hideModal(); };
         modalActions.appendChild(saveBtn);
     }
-    
     if (options.type === 'confirm') {
         const okBtn = document.createElement('button');
         okBtn.textContent = 'Ya';
         okBtn.className = 'btn-primary font-bold py-2 px-4 rounded-lg';
-        okBtn.onclick = () => {
-            if (options.onOk) options.onOk();
-            hideModal();
-        };
+        okBtn.onclick = () => { if (options.onOk) options.onOk(); hideModal(); };
         modalActions.appendChild(okBtn);
     }
-    
     if (options.type === 'alert') {
-         const okBtn = document.createElement('button');
+        const okBtn = document.createElement('button');
         okBtn.textContent = 'OK';
         okBtn.className = 'btn-primary font-bold py-2 px-4 rounded-lg';
         okBtn.onclick = hideModal;
         modalActions.appendChild(okBtn);
     }
-
     const cancelBtn = document.createElement('button');
     cancelBtn.textContent = (options.type === 'confirm') ? 'Tidak' : 'Batal';
     cancelBtn.className = 'bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded-lg';
-    cancelBtn.onclick = () => {
-        if (options.onCancel) options.onCancel();
-        hideModal();
-    };
-    if (options.type !== 'alert') {
-        modalActions.appendChild(cancelBtn);
-    }
-    
+    cancelBtn.onclick = () => { if (options.onCancel) options.onCancel(); hideModal(); };
+    if (options.type !== 'alert') { modalActions.appendChild(cancelBtn); }
     modalOverlay.classList.remove('hidden');
     if (options.type === 'prompt') modalInput.focus();
 }
@@ -256,7 +243,8 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('live-date').textContent = new Date().toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
 
     const tabs = document.querySelectorAll('.tab-btn');
-    const views = document.querySelectorAll('main');
+    const views = document.querySelectorAll('.view-container');
+
     views.forEach(view => view.classList.add('hidden'));
     document.getElementById('view-form').classList.remove('hidden');
 
@@ -271,35 +259,82 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
+    // --- LOGIKA FORM INTERAKTIF ---
+    const form = document.getElementById("form-input");
     const barangSelect = document.getElementById("barang");
+    const bahanPoloSelect = document.getElementById("bahan-polo");
+    const tipeLenganSelect = document.getElementById("tipe-lengan");
+    const ukuranSelect = document.getElementById("ukuran");
+    const jumlahInput = document.getElementById("jumlah");
+
+    const opsiBahanPolo = document.getElementById("opsi-bahan-polo");
     const opsiTipeLengan = document.getElementById("opsi-tipe-lengan");
     const opsiUkuran = document.getElementById("opsi-ukuran");
 
+    const livePriceDisplay = document.getElementById("live-price-display");
+    const hargaSatuanDisplay = document.getElementById("harga-satuan-display");
+    const hargaTotalDisplay = document.getElementById("harga-total-display");
+    
     function toggleFormOptions() {
         const selectedBarang = barangSelect.value;
+        opsiBahanPolo.classList.toggle('hidden', selectedBarang !== 'Kaos Polo');
         opsiTipeLengan.classList.toggle('hidden', selectedBarang !== 'Kaos');
         opsiUkuran.classList.toggle('hidden', !BARANG_PAKAI_UKURAN.includes(selectedBarang));
     }
-    barangSelect.addEventListener('change', toggleFormOptions);
+    
+    function updateLivePrice() {
+        // Tampilkan blok harga
+        livePriceDisplay.classList.remove('hidden');
+
+        const item = {
+          barang: barangSelect.value,
+          bahanPolo: bahanPoloSelect.value,
+          tipeLengan: tipeLenganSelect.value,
+          ukuran: ukuranSelect.value,
+        };
+        const jumlah = parseInt(jumlahInput.value) || 0;
+        
+        const hargaSatuan = hitungHargaSatuan(item);
+        const hargaTotal = hargaSatuan * jumlah;
+        
+        hargaSatuanDisplay.textContent = formatRupiah(hargaSatuan);
+        hargaTotalDisplay.textContent = formatRupiah(hargaTotal);
+    }
+
+    // Event listener untuk semua input form yang relevan
+    [barangSelect, bahanPoloSelect, tipeLenganSelect, ukuranSelect].forEach(el => {
+        el.addEventListener('change', () => {
+            if (el === barangSelect) {
+                toggleFormOptions();
+            }
+            updateLivePrice();
+        });
+    });
+    jumlahInput.addEventListener('input', updateLivePrice);
+
+    // Panggil fungsi toggle saat pertama kali halaman dimuat
     toggleFormOptions();
 
-    document.getElementById("form-input").addEventListener("submit", e => {
+    form.addEventListener("submit", e => {
       e.preventDefault();
       const pesanan = getPesanan();
       const newItem = {
           id: Date.now() + Math.random(),
           nama: document.getElementById("nama").value.trim(),
-          barang: document.getElementById("barang").value,
-          tipeLengan: document.getElementById("tipe-lengan").value,
-          ukuran: document.getElementById("ukuran").value,
-          jumlah: parseInt(document.getElementById("jumlah").value) || 1,
+          barang: barangSelect.value,
+          bahanPolo: bahanPoloSelect.value,
+          tipeLengan: tipeLenganSelect.value,
+          ukuran: ukuranSelect.value,
+          jumlah: parseInt(jumlahInput.value) || 1,
           tanggal: formatTanggal(new Date())
       };
 
       const keyGenerator = (item) => [
-          item.nama.toLowerCase(), item.barang,
-          BARANG_PAKAI_UKURAN.includes(item.barang) ? item.ukuran : 'no-size',
-          item.barang === 'Kaos' ? item.tipeLengan : 'no-sleeve'
+          item.nama.toLowerCase(), 
+          item.barang,
+          item.barang === 'Kaos Polo' ? item.bahanPolo : 'no-bahan',
+          item.barang === 'Kaos' ? item.tipeLengan : 'no-sleeve',
+          BARANG_PAKAI_UKURAN.includes(item.barang) ? item.ukuran : 'no-size'
       ].join('-');
 
       const newItemKey = keyGenerator(newItem);
@@ -317,6 +352,7 @@ document.addEventListener('DOMContentLoaded', () => {
       setPesanan(pesanan);
       e.target.reset();
       toggleFormOptions();
+      livePriceDisplay.classList.add('hidden'); // Sembunyikan lagi setelah submit
       document.getElementById("nama").focus();
     });
     

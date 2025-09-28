@@ -12,7 +12,7 @@
 </head>
 <body class="flex flex-col min-h-screen p-4 sm:p-6 md:p-8">
 
-    <div class="flex-grow max-w-7xl mx-auto bg-white p-6 rounded-xl shadow-lg w-full">
+    <div class="flex-grow max-w-7xl mx-auto bg-white p-6 rounded-xl shadow-lg w-full mb-12">
         <header class="grid grid-cols-3 items-center gap-4 mb-6 no-print">
             <div class="justify-self-start">
                 <img src="logo-warna.png" alt="Logo Perusahaan" class="h-20 w-auto" onerror="this.style.display='none'; this.onerror=null;">
@@ -22,7 +22,7 @@
             </div>
             <div class="justify-self-end text-right" style="color: var(--brand-dark);">
                 <p id="live-date" class="text-lg font-semibold"></p>
-                <p class="text-sm">Versi Aplikasi 3.9</p>
+                <p class="text-sm">Versi Aplikasi 3.9.16</p>
             </div>
         </header>
 
@@ -34,7 +34,7 @@
             </div>
         </nav>
 
-        <main id="view-form">
+        <main id="view-form" class="view-container">
             <div class="max-w-xl mx-auto bg-white p-8 rounded-lg shadow-md border">
                 <h2 class="text-xl font-bold mb-6" style="color: var(--brand-dark);">Tambah Pesanan Baru</h2>
                 <form id="form-input" class="space-y-4">
@@ -47,29 +47,43 @@
                         <label for="barang" class="block text-sm font-medium text-gray-700">Jenis Barang</label>
                         <select id="barang" class="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-orange-500 focus:border-orange-500 sm:text-sm">
                             <option>Kaos</option>
+                            <option>Kaos Polo</option>
                             <option>Jaket Hoodie</option>
                             <option>Jaket Gunung</option>
                             <option>PDL</option>
-                            <option>Topi</option>
+                            <option>Topi (Bahan Rafael)</option>
+                            <option>Kaos Kaki</option>
+                            <option>Pin (4.4mm)</option>
                             <option>Gantungan Kunci</option>
                             <option>Pulpen</option>
                             <option>Block Note</option>
                         </select>
                     </div>
 
-                    <div class="grid grid-cols-2 gap-4">
-                      <div id="opsi-tipe-lengan" class="hidden">
-                        <label for="tipe-lengan" class="block text-sm font-medium text-gray-700">Tipe Lengan</label>
-                        <select id="tipe-lengan" class="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-orange-500 focus:border-orange-500 sm:text-sm">
-                          <option value="Pendek">Pendek</option>
-                          <option value="Panjang">Panjang</option>
+                    <div class="space-y-4">
+                      <div id="opsi-bahan-polo" class="hidden">
+                        <label for="bahan-polo" class="block text-sm font-medium text-gray-700">Bahan Kaos Polo</label>
+                        <select id="bahan-polo" class="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-orange-500 focus:border-orange-500 sm:text-sm">
+                          <option>Lacoste, Sablon</option>
+                          <option>Lacoste, Bordir</option>
+                          <option>Katun Combed 24s, Sablon</option>
                         </select>
                       </div>
-                      <div id="opsi-ukuran" class="hidden">
-                        <label for="ukuran" class="block text-sm font-medium text-gray-700">Ukuran</label>
-                        <select id="ukuran" class="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-orange-500 focus:border-orange-500 sm:text-sm">
-                          <option>S</option><option>M</option><option>L</option><option>XL</option><option>XXL</option><option>XXXL</option>
-                        </select>
+
+                      <div class="grid grid-cols-2 gap-4">
+                        <div id="opsi-tipe-lengan" class="hidden">
+                          <label for="tipe-lengan" class="block text-sm font-medium text-gray-700">Tipe Lengan</label>
+                          <select id="tipe-lengan" class="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-orange-500 focus:border-orange-500 sm:text-sm">
+                            <option value="Pendek">Pendek</option>
+                            <option value="Panjang">Panjang</option>
+                          </select>
+                        </div>
+                        <div id="opsi-ukuran" class="hidden">
+                          <label for="ukuran" class="block text-sm font-medium text-gray-700">Ukuran</label>
+                          <select id="ukuran" class="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-orange-500 focus:border-orange-500 sm:text-sm">
+                            <option>S</option><option>M</option><option>L</option><option>XL</option><option>XXL</option><option>XXXL</option><option>Allsize</option>
+                          </select>
+                        </div>
                       </div>
                     </div>
 
@@ -77,6 +91,12 @@
                         <label for="jumlah" class="block text-sm font-medium text-gray-700">Jumlah Pesanan</label>
                         <input type="number" id="jumlah" min="1" value="1" class="mt-1 block w-full py-2 px-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-orange-500 focus:border-orange-500 sm:text-sm" required/>
                     </div>
+
+                    <div id="live-price-display" class="pt-2 space-y-1 text-right hidden">
+                        <p class="text-sm text-gray-600">Harga Satuan: <span id="harga-satuan-display" class="font-bold text-lg" style="color: var(--brand-dark);">Rp0</span></p>
+                        <p class="text-sm text-gray-600">Total Harga: <span id="harga-total-display" class="font-bold text-lg" style="color: var(--brand-primary);">Rp0</span></p>
+                    </div>
+                    
                     <div class="pt-4 flex justify-end">
                         <button type="submit" class="btn-primary font-bold py-2 px-4 rounded-lg flex items-center">
                             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
@@ -85,22 +105,9 @@
                     </div>
                 </form>
             </div>
-            <div class="max-w-xl mx-auto mt-8 p-4 rounded-md" style="background-color: var(--brand-light);">
-                <h3 class="font-semibold" style="color: var(--brand-dark);">Aturan & Harga Dasar</h3>
-                <ul class="list-disc list-inside text-sm text-gray-700 mt-2 space-y-1">
-                  <li>Harga Kaos: <strong>Rp85.000</strong></li>
-                  <li class="ml-4">Lengan panjang: <strong>+Rp10.000</strong></li>
-                  <li class="ml-4">Ukuran XXL/XXXL: <strong>+Rp10.000</strong></li>
-                  <li>Harga Jaket Hoodie: <strong>Rp150.000</strong></li>
-                  <li>Harga Jaket Gunung: <strong>Rp250.000</strong></li>
-                  <li>Harga Gantungan Kunci, Pulpen, Block Note: <strong>@Rp8.000</strong></li>
-                  <li>Diskon diterapkan per item jika jumlahnya memenuhi syarat.</li>
-                </ul>
-            </div>
         </main>
 
-        <main id="view-rekap" class="hidden">
-            
+        <div id="view-rekap" class="hidden view-container">
             <div class="overflow-x-auto rounded-lg shadow-md border border-gray-200">
               <table class="w-full text-sm border-collapse">
                 <thead class="text-white text-center font-medium">
@@ -117,17 +124,9 @@
                 </thead>
                 <tbody id="tabel-hasil" class="text-gray-700"></tbody>
                 <tfoot class="font-bold text-center">
-                  <tr class="bg-gray-100">
-                    <td colspan="7" class="border p-3 text-right">Grand Total (Sebelum Diskon)</td>
-                    <td id="grand-total" class="border p-3 money text-left">Rp0</td>
-                  </tr>
-                  <tr class="bg-gray-200">
-                    <td colspan="7" class="border p-3 text-right">Total Diskon (dari Semua Pesanan)</td>
-                    <td id="diskon" class="border p-3 money text-left">Rp0</td>
-                  </tr>
                   <tr style="background-color: var(--brand-light);">
-                    <td colspan="7" class="border p-3 text-right text-lg" style="color: var(--brand-dark);">Total Akhir Yang Harus Dibayar</td>
-                    <td id="total-diskon" class="border p-3 money text-left text-lg" style="color: var(--brand-dark);">Rp0</td>
+                    <td colspan="7" class="border p-3 text-right text-lg" style="color: var(--brand-dark);">Total Bayar</td>
+                    <td id="grand-total" class="border p-3 money text-left text-lg" style="color: var(--brand-dark);">Rp0</td>
                   </tr>
                 </tfoot>
               </table>
@@ -140,9 +139,9 @@
                  <button id="cetak" class="btn-tertiary font-bold py-2 px-4 rounded-lg flex items-center transition-colors duration-200"><svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>Cetak / Simpan PDF</button>
                  <button id="clear" class="btn-secondary font-bold py-2 px-4 rounded-lg flex items-center transition-colors duration-200"><svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>Kosongkan Data</button>
             </div>
-        </main>
+        </div>
 
-        <main id="view-kontak" class="hidden">
+        <div id="view-kontak" class="hidden view-container">
              <div class="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-8">
                 <div class="bg-white p-6 rounded-lg shadow-md border">
                     <h2 class="text-xl font-bold mb-4" style="color: var(--brand-dark);">Lokasi Workshop & Kontak Kami</h2>
@@ -186,7 +185,7 @@
                     <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3951.693123545196!2d112.6718428153449!3d-7.92611109428581!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2dd62b9a7a67f131%3A0x8d28b76a74a1024!2sTritunggal%20Lancar%20(Custom%20kaos%2C%20jaket%2C%20pdh%20dll)!5e0!3m2!1sen!2sid!4v1663845831952!5m2!1sen!2sid" width="100%" height="100%" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
                 </div>
             </div>
-        </main>
+        </div>
     </div>
 
     <div id="modal-overlay" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
@@ -201,7 +200,7 @@
         </div>
     </div>
 
-    <footer class="no-print mt-auto text-white mt-12" style="background-color: #2D2D2D;">
+    <footer class="no-print mt-auto text-white" style="background-color: #2D2D2D;">
         <div class="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-8 text-sm p-8">
             <div class="md:col-span-1">
                 <img src="logo-bw.png" alt="Logo Tritunggal Lancar" class="h-20 w-auto mb-4" onerror="this.style.display='none'; this.onerror=null;">
@@ -244,7 +243,7 @@
                 </h3>
                 <a href="mailto:kustomofamily@gmail.com" class="text-gray-300 hover:text-white">kustomofamily@gmail.com</a>
             </div>
-            <div class="flex justify-start md:justify-end items-start space-x-4 mt-4 md:mt-0">
+            <div class="social-icons-container flex justify-start md:justify-end items-start space-x-4 mt-4 md:mt-0">
                  <a href="https://www.instagram.com/ttl_workshop" target="_blank" class="text-gray-300 hover:text-white">
                      <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path fill-rule="evenodd" d="M12.315 2c2.43 0 2.784.013 3.808.06 1.064.049 1.791.218 2.427.465a4.902 4.902 0 011.772 1.153 4.902 4.902 0 011.153 1.772c.247.636.416 1.363.465 2.427.048 1.024.06 1.378.06 3.808s-.012 2.784-.06 3.808c-.049 1.064-.218 1.791-.465 2.427a4.902 4.902 0 01-1.153 1.772 4.902 4.902 0 01-1.772 1.153c-.636.247-1.363.416-2.427.465-1.024.048-1.378.06-3.808.06s-2.784-.012-3.808-.06c-1.064-.049-1.791-.218-2.427-.465a4.902 4.902 0 01-1.772-1.153 4.902 4.902 0 01-1.153-1.772c-.247-.636-.416-1.363-.465-2.427-.048-1.024-.06-1.378-.06-3.808s.012-2.784.06-3.808c.049-1.064.218-1.791.465-2.427a4.902 4.902 0 011.153-1.772A4.902 4.902 0 016.08 2.525c.636-.247 1.363.416 2.427-.465C9.53 2.013 9.884 2 12.315 2zM12 0C9.81 0 9.43.01 8.35.057c-1.12.05-1.9.223-2.59.484a6.897 6.897 0 00-2.33 1.62A6.897 6.897 0 001.81 6.35c-.26.69-.434 1.47-.484 2.59C1.272 9.43 1.262 9.81 1.262 12s.01 2.57.057 3.65c.05 1.12.223 1.9.484 2.59a6.897 6.897 0 001.62 2.33 6.897 6.897 0 002.33 1.62c.69.26 1.47.434 2.59.484C9.43 22.728 9.81 22.738 12 22.738s2.57-.01 3.65-.057c1.12-.05 1.9-.223 2.59-.484a6.897 6.897 0 002.33-1.62 6.897 6.897 0 001.62-2.33c.26-.69.434-1.47.484-2.59.048-1.08.057-1.46.057-3.65s-.01-2.57-.057-3.65c-.05-1.12-.223-1.9-.484-2.59a6.897 6.897 0 00-1.62-2.33A6.897 6.897 0 0018.19.54c-.69-.26-1.47-.434-2.59-.484C14.57.01 14.19 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.88 1.44 1.44 0 000-2.88z" clip-rule="evenodd"></path></svg>
                  </a>
@@ -258,7 +257,7 @@
         </div>
     </footer>
 
-
     <script src="script.js"></script>
 </body>
 </html>
+}

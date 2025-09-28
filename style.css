@@ -69,3 +69,10 @@ body {
     body { padding: 0; margin: 0; background-color: white; }
     main { box-shadow: none !important; border: none !important; margin: 0; padding: 0; }
 }
+
+/* Penambahan Jarak Footer */
+@media (min-width: 768px) {
+    .social-icons-container {
+        margin-left: 3rem; /* Menyerupai md:ml-12 di Tailwind CSS */
+    }
+}
