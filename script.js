@@ -3,7 +3,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // STEP 1: DEKLARASI VARIABEL GLOBAL, KONSTANTA, & STATE
     let HARGA_BARANG = {};
-    const GOOGLE_SHEET_URL = 'https://script.google.com/macros/s/AKfycbw9HZinSahuAQxkuhEFWEhJbk3dVNJl1Q4W-LpDJfBDYcJEtPdLC_aMv1w57MJBFmAH/exec';
+    const GOOGLE_SHEET_URL = 'https://script.google.com/macros/s/AKfycbxlX4Il3_DFtVEbIK2gEBku5vZ2ZPEk7FTebaZq1kqMe54lWhs9RYaVVaxzX7mqlKBn/exec';
     const BARANG_PAKAI_UKURAN = ['Kaos', 'Kaos Polo', 'Jaket Hoodie', 'Jaket Gunung', 'PDL', 'Kaos Kaki'];
     let currentSort = { column: 'nama', order: 'asc' };
     let currentFilter = 'Semua';
@@ -644,9 +644,14 @@ document.addEventListener('DOMContentLoaded', async () => {
     elements.modalCloseBtn.addEventListener('click', closeModal);
 
     // STEP 5: INISIALISASI APLIKASI
-    initializeTheme();
-    await loadPrices();
-    setActiveView('form');
-    toggleFormOptions();
-    updateLivePriceDisplay();
+    const initializeApp = async () => {
+        initializeTheme();
+        // Ganti loadPrices dengan loadDataFromSheet
+        await loadDataFromSheet(); 
+        setActiveView('form');
+        toggleFormOptions();
+        updateLivePriceDisplay();
+    };
+
+    initializeApp();
 });
