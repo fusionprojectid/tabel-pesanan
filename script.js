@@ -79,12 +79,22 @@ document.addEventListener('DOMContentLoaded', async () => {
     };
 
     const setActiveView = (tabName) => {
+        const activeClasses = 'border-b-2 border-[--brand-primary] text-[--brand-dark] font-semibold'.split(' ');
+        const inactiveClasses = 'text-[--text-secondary]'.split(' ');
+
         elements.views.forEach(view => view.classList.add('hidden'));
         const targetView = document.getElementById(`view-${tabName}`);
         if (targetView) targetView.classList.remove('hidden');
 
         elements.tabs.forEach(t => {
-            t.classList.toggle('active', t.id === `tab-${tabName}`);
+            const tabIdName = t.id.replace('tab-', '');
+            if (tabIdName === tabName) {
+                t.classList.remove(...inactiveClasses);
+                t.classList.add(...activeClasses);
+            } else {
+                t.classList.remove(...activeClasses);
+                t.classList.add(...inactiveClasses);
+            }
         });
 
         elements.sidebarBtns.forEach(btn => {
@@ -112,7 +122,14 @@ document.addEventListener('DOMContentLoaded', async () => {
     };
 
     const saveDraft = (data) => localStorage.setItem('pesananDraft', JSON.stringify(data));
-    const loadDraft = () => JSON.parse(localStorage.getItem('pesananDraft')) || [];
+    const loadDraft = () => {
+        try {
+            return JSON.parse(localStorage.getItem('pesananDraft')) || [];
+        } catch (e) {
+            console.error("Gagal memuat data dari localStorage:", e);
+            return [];
+        }
+    };
     
     const toggleModalAnimationClasses = (show) => {
         elements.modalContainer.classList.toggle('scale-95', !show);
@@ -145,7 +162,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             const confirmButton = Object.assign(document.createElement('button'), {
                 textContent: confirmText,
-                className: 'px-4 py-2 btn-primary rounded-md focus:outline-none focus:ring-2 focus:ring-brand-primary',
+                className: 'px-4 py-2 bg-[--brand-primary] text-[#4b271b] font-semibold rounded-md focus:outline-none focus:ring-2 focus:ring-brand-primary hover:bg-[--brand-secondary] hover:text-white transition-colors',
                 onclick: () => { closeModal(); resolve(type === 'prompt' ? elements.modalInput.value : true); }
             });
             elements.modalActions.appendChild(confirmButton);
@@ -162,7 +179,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         elements.rekapContainer.innerHTML = '';
         const pesanan = loadDraft();
         const filteredPesanan = pesanan.filter(p => p.nama.toLowerCase().includes(searchTerm.toLowerCase()) || p.barang.toLowerCase().includes(searchTerm.toLowerCase()));
-
+        
         if (filteredPesanan.length === 0) {
             elements.tabelHasil.innerHTML = `<tr><td colspan="8" class="text-center p-4 text-text-secondary">Belum ada data pesanan.</td></tr>`;
             elements.grandTotalEl.textContent = formatRupiah(0);
@@ -173,7 +190,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         const rekapBarang = {};
         filteredPesanan.forEach(item => {
             grandTotal += item.hargaSatuan * item.jumlah;
-            
             let namaBarangRekap = item.barang;
             const detailSplit = item.detail ? item.detail.split(',')[0] : '';
             if (item.barang === 'Kaos Polo') {
@@ -181,15 +197,15 @@ document.addEventListener('DOMContentLoaded', async () => {
             } else if (item.barang === 'Topi') {
                 namaBarangRekap = `Topi - ${detailSplit}`;
             }
-
             rekapBarang[namaBarangRekap] = (rekapBarang[namaBarangRekap] || 0) + item.jumlah;
         });
+
         elements.grandTotalEl.textContent = formatRupiah(grandTotal);
 
         for (const barang in rekapBarang) {
             const card = document.createElement('div');
-            card.className = 'rekap-card p-4 rounded-lg shadow-md border text-center';
-            card.innerHTML = `<p class="text-sm text-text-secondary">Total ${barang}</p><p class="text-3xl font-bold text-brand-dark">${rekapBarang[barang]}</p>`;
+            card.className = 'bg-[--bg-secondary] border border-[--border-primary] p-4 rounded-lg shadow-md text-center';
+            card.innerHTML = `<p class="text-sm text-text-secondary">Total ${barang}</p><p class="text-3xl font-bold text-[--brand-dark]">${rekapBarang[barang]}</p>`;
             elements.rekapContainer.appendChild(card);
         }
 
@@ -208,20 +224,20 @@ document.addEventListener('DOMContentLoaded', async () => {
             items.forEach((item, itemIndex) => {
                 const subtotal = item.hargaSatuan * item.jumlah;
                 totalPerNama += subtotal;
-                const isEvenRow = itemIndex % 2 !== 0;
-                const rowClass = isEvenRow ? 'row-even' : '';
+                const rowClass = 'even:bg-black/5 dark:even:bg-white/5';
                 const actionButtons = `<button class="edit-btn text-blue-500 hover:text-blue-700" data-id="${item.id}" title="Ubah Jumlah"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.5L15.232 5.232z"></path></svg></button><button class="delete-btn text-red-500 hover:text-red-700" data-id="${item.id}" title="Hapus Item"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg></button>`;
                 
                 let rowHTML = '';
                 if (itemIndex === 0) {
-                    rowHTML += `<tr class="border-b text-center"><td class="p-3 align-top" rowspan="${items.length}">${groupIndex}</td><td class="p-3 text-left align-top font-semibold" rowspan="${items.length}">${nama}</td>`;
+                    rowHTML += `<tr class="border-b text-center ${rowClass}"><td class="p-3 align-top" rowspan="${items.length}">${groupIndex}</td><td class="p-3 text-left align-top font-semibold" rowspan="${items.length}">${nama}</td>`;
                 } else {
                     rowHTML += `<tr class="border-b text-center ${rowClass}">`;
                 }
-                rowHTML += `<td class="p-3 text-left">${item.barang}</td><td class="p-3 text-left">${item.detail || '-'}</td><td class="p-3">${item.jumlah}</td><td class="p-3 money text-right">${formatRupiah(item.hargaSatuan)}</td><td class="p-3 money text-right">${formatRupiah(subtotal)}</td><td class="p-3 flex justify-center items-center gap-2">${actionButtons}</td></tr>`;
+                rowHTML += `<td class="p-3 text-left">${item.barang}</td><td class="p-3 text-left">${item.detail || '-'}</td><td class="p-3">${item.jumlah}</td><td class="p-3 tabular-nums text-right">${formatRupiah(item.hargaSatuan)}</td><td class="p-3 tabular-nums text-right">${formatRupiah(subtotal)}</td><td class="p-3 flex justify-center items-center gap-2">${actionButtons}</td></tr>`;
                 tableRowsHTML += rowHTML;
             });
-            tableRowsHTML += `<tr class="group-footer"><td colspan="8" class="text-right font-bold"><div class="flex justify-end items-center px-3"><span class="mr-4">Total untuk ${nama}</span><span class="inline-block w-32 text-right">${formatRupiah(totalPerNama)}</span><span class="inline-block w-24 text-center"><button class="delete-group-btn text-xs text-white bg-red-500 hover:bg-red-700 px-2 py-1 rounded" data-nama="${nama}">Hapus Semua</button></span></div></td></tr>`;
+            const escapedNama = nama.replace(/"/g, '&quot;');
+            tableRowsHTML += `<tr class="border-b-2 border-[--brand-secondary]"><td colspan="8" class="text-right font-bold py-3"><div class="flex justify-end items-center px-3 gap-x-4"><span class="mr-4">Total untuk ${nama}</span><span class="inline-block w-32 text-right tabular-nums">${formatRupiah(totalPerNama)}</span><span class="inline-block w-24 text-center"><button class="delete-group-btn text-xs text-white bg-red-500 hover:bg-red-700 px-2 py-1 rounded" data-nama="${escapedNama}">Hapus Semua</button></span></div></td></tr>`;
             elements.tabelHasil.innerHTML += tableRowsHTML;
         }
     };
@@ -234,8 +250,9 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         if (selectedBarang === 'Kaos Polo' && elements.bahanPoloSelect.value) detailArray.push(elements.bahanPoloSelect.value);
         if (selectedBarang === 'Topi' && elements.bahanTopiSelect.value) detailArray.push(elements.bahanTopiSelect.value);
-        if (selectedBarang === 'Kaos Polo') detailArray.push('Panjang');
-        else if (elements.opsiTipeLengan.style.display !== 'none' && elements.tipeLenganSelect.value) detailArray.push(elements.tipeLenganSelect.value);
+        // KESALAHAN 2: Baris di bawah ini salah karena selalu menambahkan "Panjang" untuk Kaos Polo. Baris ini telah dihapus.
+        // if (selectedBarang === 'Kaos Polo') detailArray.push('Panjang');
+        if (elements.opsiTipeLengan.style.display !== 'none' && elements.tipeLenganSelect.value) detailArray.push(elements.tipeLenganSelect.value);
         if (elements.opsiUkuran.style.display !== 'none' && elements.ukuranSelect.value) detailArray.push(elements.ukuranSelect.value);
         
         const newItem = {
@@ -258,6 +275,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         toggleFormOptions();
         updateLivePriceDisplay();
         await showModal({ title: 'Berhasil!', message: 'Pesanan berhasil ditambahkan.' });
+        setActiveView('rekap');
     };
 
     const calculatePrice = () => {
@@ -268,17 +286,23 @@ document.addEventListener('DOMContentLoaded', async () => {
         
         let basePrice = 0;
 
+        // KESALAHAN 3: Logika harga ukuran besar hanya berlaku untuk Kaos Polo.
+        // Ini diperbaiki dengan memisahkan penentuan harga dasar dan penambahan harga ukuran.
+        
+        // Langkah 1: Tentukan harga dasar berdasarkan jenis barang dan bahan
         if (barang === 'Kaos Polo') {
             basePrice = HARGA_BARANG[bahanPolo] || 0;
-            if (['XXL', 'XXXL'].includes(ukuran)) {
-                basePrice += 10000;
-            }
         } else if (barang === 'Topi') {
             basePrice = HARGA_BARANG[bahanTopi] || 0;
         } else {
             basePrice = HARGA_BARANG[barang] || 0;
         }
         
+        // Langkah 2: Tambahkan biaya tambahan untuk ukuran besar jika barang termasuk dalam daftar
+        if (BARANG_PAKAI_UKURAN.includes(barang) && ['XXL', 'XXXL'].includes(ukuran)) {
+            basePrice += 10000;
+        }
+
         return basePrice;
     };
     
