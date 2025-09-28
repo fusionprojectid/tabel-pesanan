@@ -8,6 +8,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     // STEP 2: DEKLARASI SEMUA ELEMEN DOM
     const elements = {
         tabs: document.querySelectorAll('.tab-btn'),
+        hamburgerBtn: document.getElementById('hamburger-btn'),
+        sidebarMenu: document.getElementById('sidebar-menu'),
+        sidebarOverlay: document.getElementById('sidebar-overlay'),
+        sidebarBtns: document.querySelectorAll('.sidebar-btn'),
+        sidebarLogo: document.getElementById('sidebar-logo'),
         views: document.querySelectorAll('.view-container'),
         form: document.getElementById('form-input'),
         namaInput: document.getElementById('nama'),
@@ -40,19 +45,20 @@ document.addEventListener('DOMContentLoaded', async () => {
         emailBtn: document.getElementById("email-btn"),
         livePriceDisplay: document.getElementById('live-price-display'),
         hargaSatuanDisplay: document.getElementById('harga-satuan-display'),
-        themeToggleBtn: document.getElementById('theme-toggle'),
-        themeToggleDarkIcon: document.getElementById('theme-toggle-dark-icon'),
-        themeToggleLightIcon: document.getElementById('theme-toggle-light-icon'),
-        headerLogo: document.getElementById('header-logo'),
+        themeToggleBtnSidebar: document.getElementById('theme-toggle-sidebar'),
+        themeToggleDarkIconSidebar: document.getElementById('theme-toggle-dark-icon-sidebar'),
+        themeToggleLightIconSidebar: document.getElementById('theme-toggle-light-icon-sidebar'),
     };
 
     // STEP 3: DEKLARASI FUNGSI-FUNGSI UTAMA
 
     const applyTheme = (isDarkMode) => {
         document.documentElement.classList.toggle('dark', isDarkMode);
-        elements.themeToggleLightIcon.classList.toggle('hidden', isDarkMode);
-        elements.themeToggleDarkIcon.classList.toggle('hidden', !isDarkMode);
-        elements.headerLogo.src = isDarkMode ? 'assets/logo-bw.png' : 'assets/logo-warna.png';
+        elements.themeToggleLightIconSidebar.classList.toggle('hidden', isDarkMode);
+        elements.themeToggleDarkIconSidebar.classList.toggle('hidden', !isDarkMode);
+        
+        const logoPath = isDarkMode ? 'assets/logo-bw.png' : 'assets/logo-warna.png';
+        if (elements.sidebarLogo) elements.sidebarLogo.src = logoPath;
     };
 
     const toggleTheme = () => {
@@ -65,6 +71,33 @@ document.addEventListener('DOMContentLoaded', async () => {
         const isDarkMode = localStorage.getItem('theme') === 'dark' || 
                            (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches);
         applyTheme(isDarkMode);
+    };
+    
+    const toggleSidebar = () => {
+        elements.sidebarMenu.classList.toggle('-translate-x-full');
+        elements.sidebarOverlay.classList.toggle('hidden');
+    };
+
+    const setActiveView = (tabName) => {
+        elements.views.forEach(view => view.classList.add('hidden'));
+        const targetView = document.getElementById(`view-${tabName}`);
+        if (targetView) targetView.classList.remove('hidden');
+
+        elements.tabs.forEach(t => {
+            t.classList.toggle('active', t.id === `tab-${tabName}`);
+        });
+
+        elements.sidebarBtns.forEach(btn => {
+            btn.classList.toggle('active', btn.dataset.tab === tabName);
+        });
+
+        if (tabName === 'rekap') {
+            renderHasil(elements.searchRekap.value);
+        }
+
+        if (!elements.sidebarMenu.classList.contains('-translate-x-full')) {
+            toggleSidebar();
+        }
     };
     
     const formatRupiah = (angka) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(angka);
@@ -371,14 +404,20 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // STEP 4: PASANG EVENT LISTENERS
     elements.liveDateEl.textContent = new Date().toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+    
     elements.tabs.forEach(tab => {
         tab.addEventListener('click', () => {
-            elements.tabs.forEach(t => t.classList.remove('active'));
-            tab.classList.add('active');
-            elements.views.forEach(view => view.classList.add('hidden'));
-            const targetView = document.getElementById(tab.id.replace('tab-', 'view-'));
-            if (targetView) targetView.classList.remove('hidden');
-            if (tab.id === 'tab-rekap') renderHasil(elements.searchRekap.value);
+            const tabName = tab.id.replace('tab-', '');
+            setActiveView(tabName);
+        });
+    });
+
+    elements.hamburgerBtn.addEventListener('click', toggleSidebar);
+    elements.sidebarOverlay.addEventListener('click', toggleSidebar);
+    elements.sidebarBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            const tabName = btn.dataset.tab;
+            setActiveView(tabName);
         });
     });
     
@@ -420,13 +459,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         window.location.href = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
     });
     elements.pdfBtn.addEventListener("click", exportToPDF);
-    elements.themeToggleBtn.addEventListener('click', toggleTheme);
+    elements.themeToggleBtnSidebar.addEventListener('click', toggleTheme);
 
     // STEP 5: INISIALISASI APLIKASI
     initializeTheme();
     await loadPrices();
-    elements.views.forEach(view => view.classList.add('hidden'));
-    document.getElementById('view-form').classList.remove('hidden');
+    setActiveView('form');
     toggleFormOptions();
     updateLivePriceDisplay();
 });
