@@ -73,14 +73,14 @@ Tujuan utamanya adalah untuk menggantikan pencatatan manual, mengurangi kesalaha
 
 Proyek ini disusun dengan memisahkan antara struktur, gaya, logika, dan data untuk kemudahan pengelolaan.
 
-
+```
 /
 ├── index.html       # File HTML utama yang berisi struktur halaman.
 ├── style.css        # File CSS kustom untuk styling dan theming (terang/gelap).
 ├── script.js        # File JavaScript utama yang berisi semua logika aplikasi.
 ├── prices.json      # File data JSON yang menyimpan semua informasi harga barang.
 └── /assets/         # Folder untuk aset seperti logo (logo-warna.png, logo-bw.png).
-
+```
 
 ---
 
