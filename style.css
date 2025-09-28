@@ -50,6 +50,26 @@ body {
     background-color: #16a34a; /* green-600 */
 }
 
+/* === TOMBOL BARU === */
+.btn-excel {
+    background-color: #166534; /* green-800 */
+    color: white;
+    transition: background-color 0.2s;
+}
+.btn-excel:hover {
+    background-color: #14532d; /* green-900 */
+}
+
+.btn-email {
+    background-color: #2563eb; /* blue-600 */
+    color: white;
+    transition: background-color 0.2s;
+}
+.btn-email:hover {
+    background-color: #1d4ed8; /* blue-700 */
+}
+/* === AKHIR TOMBOL BARU === */
+
 .tab-btn.active { 
     border-bottom: 3px solid var(--brand-primary); 
     color: var(--brand-dark); 
@@ -70,9 +90,8 @@ body {
     main { box-shadow: none !important; border: none !important; margin: 0; padding: 0; }
 }
 
-/* Penambahan Jarak Footer */
 @media (min-width: 768px) {
     .social-icons-container {
-        margin-left: 3rem; /* Menyerupai md:ml-12 di Tailwind CSS */
+        margin-left: 3rem;
     }
 }
