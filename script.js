@@ -14,9 +14,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         barangSelect: document.getElementById('barang'),
         jumlahInput: document.getElementById('jumlah'),
         bahanPoloSelect: document.getElementById('bahan-polo'),
+        bahanTopiSelect: document.getElementById('bahan-topi'),
         tipeLenganSelect: document.getElementById('tipe-lengan'),
         ukuranSelect: document.getElementById('ukuran'),
         opsiBahanPolo: document.getElementById('opsi-bahan-polo'),
+        opsiBahanTopi: document.getElementById('opsi-bahan-topi'),
         opsiTipeLengan: document.getElementById('opsi-tipe-lengan'),
         opsiUkuran: document.getElementById('opsi-ukuran'),
         tabelHasil: document.getElementById('tabel-hasil'),
@@ -138,7 +140,15 @@ document.addEventListener('DOMContentLoaded', async () => {
         const rekapBarang = {};
         filteredPesanan.forEach(item => {
             grandTotal += item.hargaSatuan * item.jumlah;
-            const namaBarangRekap = item.barang === 'Kaos Polo' ? `Kaos Polo - ${item.detail.split(',')[0]}` : item.barang;
+            
+            let namaBarangRekap = item.barang;
+            const detailSplit = item.detail ? item.detail.split(',')[0] : '';
+            if (item.barang === 'Kaos Polo') {
+                namaBarangRekap = `Kaos Polo - ${detailSplit}`;
+            } else if (item.barang === 'Topi') {
+                namaBarangRekap = `Topi - ${detailSplit}`;
+            }
+
             rekapBarang[namaBarangRekap] = (rekapBarang[namaBarangRekap] || 0) + item.jumlah;
         });
         elements.grandTotalEl.textContent = formatRupiah(grandTotal);
@@ -188,10 +198,13 @@ document.addEventListener('DOMContentLoaded', async () => {
         const pesanan = loadDraft();
         const selectedBarang = elements.barangSelect.value;
         const detailArray = [];
+
         if (selectedBarang === 'Kaos Polo' && elements.bahanPoloSelect.value) detailArray.push(elements.bahanPoloSelect.value);
+        if (selectedBarang === 'Topi' && elements.bahanTopiSelect.value) detailArray.push(elements.bahanTopiSelect.value);
         if (selectedBarang === 'Kaos Polo') detailArray.push('Panjang');
         else if (elements.opsiTipeLengan.style.display !== 'none' && elements.tipeLenganSelect.value) detailArray.push(elements.tipeLenganSelect.value);
         if (elements.opsiUkuran.style.display !== 'none' && elements.ukuranSelect.value) detailArray.push(elements.ukuranSelect.value);
+        
         const newItem = {
             id: Date.now(),
             nama: elements.namaInput.value.trim(),
@@ -200,6 +213,12 @@ document.addEventListener('DOMContentLoaded', async () => {
             jumlah: parseInt(elements.jumlahInput.value),
             hargaSatuan: calculatePrice()
         };
+
+        if (newItem.hargaSatuan <= 0) {
+            await showModal({ title: 'Input Tidak Lengkap', message: 'Silakan pilih bahan atau detail lain yang diperlukan untuk menghitung harga.' });
+            return;
+        }
+        
         pesanan.push(newItem);
         saveDraft(pesanan);
         elements.form.reset();
@@ -211,7 +230,23 @@ document.addEventListener('DOMContentLoaded', async () => {
     const calculatePrice = () => {
         const barang = elements.barangSelect.value;
         const bahanPolo = elements.bahanPoloSelect.value;
-        return barang === 'Kaos Polo' ? (HARGA_BARANG[bahanPolo] || 0) : (HARGA_BARANG[barang] || 0);
+        const bahanTopi = elements.bahanTopiSelect.value;
+        const ukuran = elements.ukuranSelect.value;
+        
+        let basePrice = 0;
+
+        if (barang === 'Kaos Polo') {
+            basePrice = HARGA_BARANG[bahanPolo] || 0;
+            if (['XXL', 'XXXL'].includes(ukuran)) {
+                basePrice += 10000;
+            }
+        } else if (barang === 'Topi') {
+            basePrice = HARGA_BARANG[bahanTopi] || 0;
+        } else {
+            basePrice = HARGA_BARANG[barang] || 0;
+        }
+        
+        return basePrice;
     };
     
     const updateLivePriceDisplay = () => {
@@ -227,6 +262,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const toggleFormOptions = () => {
         const selectedBarang = elements.barangSelect.value;
         elements.opsiBahanPolo.style.display = selectedBarang === 'Kaos Polo' ? 'block' : 'none';
+        elements.opsiBahanTopi.style.display = selectedBarang === 'Topi' ? 'block' : 'none';
         const showUkuran = BARANG_PAKAI_UKURAN.includes(selectedBarang);
         elements.opsiUkuran.style.display = showUkuran ? 'block' : 'none';
         elements.opsiTipeLengan.style.display = selectedBarang === 'Kaos' ? 'block' : 'none';
@@ -349,6 +385,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     elements.form.addEventListener('submit', tambahPesanan);
     elements.barangSelect.addEventListener('change', () => { toggleFormOptions(); updateLivePriceDisplay(); });
     elements.bahanPoloSelect.addEventListener('change', updateLivePriceDisplay);
+    elements.bahanTopiSelect.addEventListener('change', updateLivePriceDisplay);
+    elements.ukuranSelect.addEventListener('change', updateLivePriceDisplay);
     elements.searchRekap.addEventListener('input', (e) => renderHasil(e.target.value));
     elements.tabelHasil.addEventListener('click', async (e) => {
         const deleteBtn = e.target.closest('.delete-btn');
