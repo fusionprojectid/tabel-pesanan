@@ -52,7 +52,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         document.documentElement.classList.toggle('dark', isDarkMode);
         elements.themeToggleLightIcon.classList.toggle('hidden', isDarkMode);
         elements.themeToggleDarkIcon.classList.toggle('hidden', !isDarkMode);
-        elements.headerLogo.src = isDarkMode ? 'logo-bw.png' : 'logo-warna.png';
+        elements.headerLogo.src = isDarkMode ? 'assets/logo-bw.png' : 'assets/logo-warna.png';
     };
 
     const toggleTheme = () => {
