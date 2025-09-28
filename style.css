@@ -50,7 +50,6 @@ body {
     background-color: #16a34a; /* green-600 */
 }
 
-/* === TOMBOL BARU === */
 .btn-excel {
     background-color: #166534; /* green-800 */
     color: white;
@@ -68,7 +67,6 @@ body {
 .btn-email:hover {
     background-color: #1d4ed8; /* blue-700 */
 }
-/* === AKHIR TOMBOL BARU === */
 
 .tab-btn.active { 
     border-bottom: 3px solid var(--brand-primary); 
