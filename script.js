@@ -3,7 +3,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // STEP 1: DEKLARASI VARIABEL GLOBAL, KONSTANTA, & STATE
     let HARGA_BARANG = {};
-    const GOOGLE_SHEET_URL = 'https://script.google.com/macros/s/AKfycbyorAWsuMrzUsYm5_nb4ffYJWtm3zIbfOwHBF2UOMLUA07_G8nePczI2_It4ywpBL_p/exec';
+    const GOOGLE_SHEET_URL = 'https://script.google.com/macros/s/AKfycbyCe4ZgR3Cs1Bxm1GuKWyTo7rPCuIri9X8RiCNyBmcoE71gPo3Yz-67HTryuwisCgUt/exec';
     const BARANG_PAKAI_UKURAN = ['Kaos', 'Kaos Polo', 'Jaket Hoodie', 'Jaket Gunung', 'PDL', 'Kaos Kaki'];
     let currentSort = { column: 'nama', order: 'asc' };
     let currentFilter = 'Semua';
@@ -103,18 +103,47 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     };
     const formatRupiah = (angka) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(angka);
-    const loadPrices = async () => {
+    const loadDataFromSheet = async () => {
+        const loadingModalPromise = showModal({ title: 'Sinkronisasi Data', message: 'Sedang memuat data terbaru dari Google Sheet...' });
         try {
-            const response = await fetch(`${GOOGLE_SHEET_URL}?action=getPrices`);
-            if (!response.ok) throw new Error('Gagal mengambil daftar harga dari Google Sheet.');
-            HARGA_BARANG = await response.json();
-            console.log("Daftar harga berhasil dimuat dari Google Sheet.");
+            const ordersResponse = await fetch(`${GOOGLE_SHEET_URL}?action=getOrders`);
+            if (!ordersResponse.ok) throw new Error('Gagal mengambil data pesanan.');
+            const ordersData = await ordersResponse.json();
+            const validOrdersData = ordersData.filter(order => order && order["ID Unik"] && order["Nama Pemesan"]);
+            const formattedOrders = validOrdersData.map(order => ({
+                id: order["ID Unik"],
+                timestamp: order.Timestamp,
+                nama: order["Nama Pemesan"],
+                barang: order.Barang,
+                detail: order.Detail,
+                jumlah: Number(order.Jumlah) || 0,
+                hargaSatuan: Number(order["Harga Satuan"]) || 0
+            }));
+            saveDraft(formattedOrders);
+            const pricesResponse = await fetch(`${GOOGLE_SHEET_URL}?action=getPrices`);
+            if (!pricesResponse.ok) throw new Error('Gagal mengambil daftar harga.');
+            HARGA_BARANG = await pricesResponse.json();
+            console.log("Sinkronisasi berhasil. Data pesanan dan harga telah dimuat.");
         } catch (error) {
-            console.error('Gagal memuat harga dari Google Sheet:', error);
+            console.error('Sinkronisasi gagal:', error);
             await showModal({
                 title: 'Koneksi Gagal',
-                message: 'Tidak dapat mengambil daftar harga terbaru dari Google Sheet. Aplikasi mungkin tidak berfungsi dengan benar.',
+                message: 'Tidak dapat mengambil data terbaru dari Google Sheet. Menampilkan data yang tersimpan di perangkat ini (jika ada).',
             });
+            if (Object.keys(HARGA_BARANG).length === 0) {
+                await loadPricesFromFile();
+            }
+        } finally {
+            closeModal();
+        }
+    };
+    const loadPricesFromFile = async () => {
+        try {
+            const response = await fetch('prices.json');
+            HARGA_BARANG = await response.json();
+            console.log("Memuat harga dari file prices.json (cadangan).");
+        } catch (error) {
+            console.error('Gagal memuat harga dari file cadangan:', error);
         }
     };
     const saveDraft = (data) => localStorage.setItem('pesananDraft', JSON.stringify(data));
@@ -350,27 +379,66 @@ document.addEventListener('DOMContentLoaded', async () => {
         elements.opsiTipeLengan.style.display = selectedBarang === 'Kaos' ? 'block' : 'none';
     };
     const deleteItem = async (id) => {
-        if (await showModal({ title: 'Konfirmasi Hapus', message: 'Hapus item ini dari pesanan?', type: 'confirm', confirmText: 'Ya, Hapus' })) {
-            saveDraft(loadDraft().filter(item => item.id !== id));
+        const confirmed = await showModal({ title: 'Konfirmasi Hapus', message: 'Hapus item ini dari pesanan?', type: 'confirm', confirmText: 'Ya, Hapus' });
+        if (!confirmed) return;
+
+        const action = 'deleteItem';
+        const payload = { id: id.toString() };
+        
+        const isSynced = await syncActionToSheet(action, payload);
+        if (isSynced) {
+            saveDraft(loadDraft().filter(item => item.id != id));
             renderHasil();
+            showModal({ title: 'Berhasil', message: 'Item telah dihapus dari web dan Google Sheet.' });
+        } else {
+            showModal({ title: 'Gagal Sinkronisasi', message: 'Gagal menghapus item dari Google Sheet. Periksa koneksi dan coba lagi.' });
         }
     };
     const deleteGroup = async (nama) => {
         const confirmed = await showModal({ title: 'Konfirmasi Hapus Grup', message: `Yakin ingin menghapus <b>SEMUA</b> pesanan atas nama <b>${nama}</b>?`, type: 'confirm', confirmText: 'Ya, Hapus Semua' });
-        if (confirmed) {
+        if (!confirmed) return;
+
+        const action = 'deleteGroup';
+        const payload = { nama: nama };
+
+        const isSynced = await syncActionToSheet(action, payload);
+        if(isSynced) {
             saveDraft(loadDraft().filter(item => item.nama !== nama));
             renderHasil();
+            showModal({ title: 'Berhasil', message: `Semua pesanan a/n ${nama} telah dihapus dari web dan Google Sheet.`});
+        } else {
+            showModal({ title: 'Gagal Sinkronisasi', message: 'Gagal menghapus grup dari Google Sheet. Periksa koneksi dan coba lagi.' });
+        }
+    };
+    const syncActionToSheet = async (action, payload) => {
+        const formData = new FormData();
+        formData.append('action', action);
+        for (const key in payload) {
+            formData.append(key, payload[key]);
+        }
+        try {
+            const response = await fetch(GOOGLE_SHEET_URL, {
+                method: 'POST',
+                body: formData,
+            });
+            const result = await response.json();
+            return result.status === 'success';
+        } catch (error) {
+            console.error('Error syncing action to Google Sheet:', error);
+            return false;
         }
     };
     const editItem = async (id) => {
         const pesanan = loadDraft();
-        const item = pesanan.find(p => p.id === id);
+        const item = pesanan.find(p => p.id == id);
         if (!item) return;
         const jumlahBaruStr = await showModal({ title: 'Ubah Jumlah', message: 'Masukkan jumlah pesanan baru:', type: 'prompt', defaultValue: item.jumlah.toString(), confirmText: 'Simpan' });
         if (jumlahBaruStr && !isNaN(jumlahBaruStr) && parseInt(jumlahBaruStr) > 0) {
+            // Logika untuk sinkronisasi edit akan ditambahkan di langkah selanjutnya
             item.jumlah = parseInt(jumlahBaruStr);
             saveDraft(pesanan);
             renderHasil();
+            showModal({title: 'Catatan', message: 'Perubahan jumlah baru tersimpan di web. Fitur sinkronisasi edit akan ditambahkan selanjutnya.'});
         } else if (jumlahBaruStr !== null) {
             await showModal({ title: 'Input Tidak Valid', message: 'Jumlah harus berupa angka lebih dari nol.' });
         }
@@ -637,7 +705,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (await showModal({ title: 'Reset Semua Data', message: 'YAKIN ingin mengosongkan <b>SEMUA</b> data pesanan?', type: 'confirm', confirmText: 'Ya, Kosongkan' })) {
             saveDraft([]);
             renderHasil();
-            await showModal({ title: 'Berhasil', message: 'Semua data pesanan telah dikosongkan.' });
         }
     });
     
@@ -652,7 +719,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     // STEP 5: INISIALISASI APLIKASI
     const initializeApp = async () => {
         initializeTheme();
-        await loadPrices(); // Kembali menggunakan loadPrices yang hanya mengambil dari Google Sheet
+        await loadDataFromSheet();
         setActiveView('form');
         toggleFormOptions();
         updateLivePriceDisplay();
