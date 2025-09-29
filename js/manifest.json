@@ -1,19 +1,19 @@
 {
   "name": "Formulir Pesanan - Tritunggal Lancar",
   "short_name": "TTL Pesanan",
-  "start_url": ".",
+  "start_url": "../index.html",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#4B271B",
   "description": "Aplikasi input pesanan untuk Tritunggal Lancar (TTL).",
   "icons": [
     {
-      "src": "assets/icons/icon-192x192.png",
+      "src": "../assets/icons/android-chrome-192x192.png",
       "sizes": "192x192",
       "type": "image/png"
     },
     {
-      "src": "assets/icons/icon-512x512.png",
+      "src": "../assets/icons/android-chrome-512x512.png",
       "sizes": "512x512",
       "type": "image/png"
     }
