@@ -288,6 +288,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     };
     const sendDataToGoogleSheet = async (data) => {
         const formData = new FormData();
+        // Tambahkan baris ini untuk memberikan instruksi ke Google Sheet
+        formData.append('action', 'addItem'); 
+        
         for (const key in data) {
             formData.append(key, data[key]);
         }
