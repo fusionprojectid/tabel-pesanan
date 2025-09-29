@@ -620,13 +620,38 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
         return Promise.resolve();
     };
+
+    // --- PERUBAHAN 2: Fungsi cetakStruk dimodifikasi untuk menambahkan logo ---
     const cetakStruk = (nama) => {
         const pesanan = loadDraft().filter(p => p.nama === nama);
         if (pesanan.length === 0) return;
         const { jsPDF } = window.jspdf;
         const doc = new jsPDF({ unit: 'mm', format: [80, 150] });
+
+        const logoImg = document.getElementById('logo-struk');
+        
+        // Posisi y (vertikal) awal untuk konten, akan disesuaikan setelah logo ditambahkan
         let y = 10;
-        let total = 0;
+
+        // --- PERUBAHAN UNTUK LOGO PROPORSIONAL ---
+        if (logoImg && logoImg.complete && logoImg.naturalHeight > 0) {
+            try {
+                const maxWidth = 30; // Tentukan lebar maksimal logo (misal: 30mm)
+                const aspectRatio = logoImg.naturalHeight / logoImg.naturalWidth;
+                const proportionalHeight = maxWidth * aspectRatio; // Hitung tinggi proporsional
+                const xPosition = (80 - maxWidth) / 2; // Hitung posisi x agar logo di tengah
+
+                doc.addImage(logoImg, 'PNG', xPosition, y, maxWidth, proportionalHeight);
+                
+                // Atur posisi y untuk teks agar berada di bawah logo + sedikit margin
+                y += proportionalHeight + 7;
+
+            } catch (e) {
+                console.error("Gagal memuat gambar logo untuk struk:", e);
+            }
+        }
+        // --- AKHIR PERUBAHAN ---
+        
         doc.setFontSize(12).setFont('helvetica', 'bold');
         doc.text('TRITUNGGAL LANCAR', 40, y, { align: 'center' });
         y += 5;
@@ -640,6 +665,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         doc.text(`Tanggal: ${new Date().toLocaleDateString('id-ID')}`, 5, y);
         y += 7;
         doc.setFont('courier', 'normal');
+        let total = 0;
         pesanan.forEach(item => {
             const subtotal = item.jumlah * item.hargaSatuan;
             total += subtotal;
