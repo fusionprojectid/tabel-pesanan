@@ -19,12 +19,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css">
-  
-  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
-  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
-  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
-  <link rel="manifest" href="/site.webmanifest">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="manifest" href="js/manifest.json">
 
 </head>
 <body class="flex flex-col min-h-screen bg-[--bg-primary] text-[--text-primary] transition-colors duration-300">
@@ -73,7 +69,7 @@
             <div class="flex-grow text-center">
                 <h1 class="text-2xl sm:text-3xl font-bold text-[--brand-dark]">Formulir Pesanan</h1>
                 <p id="live-date" class="text-sm font-semibold text-text-secondary"></p>
-                <p class="text-xs text-[#d3d3d3] mt-1">-- Aplikasi v4.5.6 --</p>
+                <p class="text-xs text-[#d3d3d3] mt-1">-- Aplikasi v4.5.0 --</p>
             </div>
             <div class="w-10"></div> </div>
 
@@ -380,7 +376,19 @@
     
     <img id="logo-struk" src="assets/logo-warna.png" style="display: none;">
 
-    <script src="script.js"></script>
+    <script src="js/script.js"></script>
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('js/sw.js')
+            .then(registration => {
+              console.log('ServiceWorker berhasil didaftarkan: ', registration.scope);
+            })
+            .catch(error => {
+              console.log('Pendaftaran ServiceWorker gagal: ', error);
+            });
+        });
+      }
+    </script>
 </body>
-
 </html>
