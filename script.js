@@ -3,7 +3,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // STEP 1: DEKLARASI VARIABEL GLOBAL, KONSTANTA, & STATE
     let HARGA_BARANG = {};
-    const GOOGLE_SHEET_URL = 'https://script.google.com/macros/s/AKfycbwyZBFrO7zaSc3MYeq3Km64nc_qojZQjXEurVCfVwrSpZC1ZdqoIDatuEjpDfrRMBeh/exec';
+    const GOOGLE_SHEET_URL = 'https://script.google.com/macros/s/AKfycbymCh-kJNolKVvD9R2XNUabVF-J2x_uwmhwVavGfPN7RHy4wTqlKSbPY2RkhCvAs2Hb/exec';
     const BARANG_PAKAI_UKURAN = ['Kaos', 'Kaos Polo', 'Jaket Hoodie', 'Jaket Gunung', 'PDL', 'Kaos Kaki'];
     let currentSort = { column: 'nama', order: 'asc' };
     let currentFilter = 'Semua';
@@ -288,8 +288,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     };
     const sendDataToGoogleSheet = async (data) => {
         const formData = new FormData();
-        // Tambahkan baris ini untuk memberikan instruksi ke Google Sheet
-        formData.append('action', 'addItem'); 
+        // PERBAIKAN 1: Mengubah 'addItem' menjadi 'addOrder' agar cocok dengan Google Sheet
+        formData.append('action', 'addOrder');
         
         for (const key in data) {
             formData.append(key, data[key]);
@@ -312,6 +312,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const originalButtonText = submitButtonText.textContent;
         submitButton.disabled = true;
         submitButtonText.textContent = 'Menyimpan...';
+
         const pesanan = loadDraft();
         const detailArray = [];
         const selectedBarang = elements.barangSelect.value;
@@ -319,6 +320,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (selectedBarang === 'Topi' && elements.bahanTopiSelect.value) detailArray.push(elements.bahanTopiSelect.value);
         if (elements.opsiTipeLengan.style.display !== 'none' && elements.tipeLenganSelect.value) detailArray.push(elements.tipeLenganSelect.value);
         if (elements.opsiUkuran.style.display !== 'none' && elements.ukuranSelect.value) detailArray.push(elements.ukuranSelect.value);
+
+        // PERBAIKAN 2: Objek ini sekarang memiliki key sederhana (nama, id) yang cocok dengan Google Sheet
         const newItem = {
             id: Date.now(),
             timestamp: new Date().toISOString(),
@@ -328,6 +331,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             jumlah: parseInt(elements.jumlahInput.value),
             hargaSatuan: calculatePrice()
         };
+
         if (!newItem.nama || !newItem.barang || newItem.jumlah <= 0) {
              await showModal({ title: 'Input Tidak Lengkap', message: 'Nama, jenis barang, dan jumlah harus diisi.' });
              submitButton.disabled = false;
@@ -340,12 +344,16 @@ document.addEventListener('DOMContentLoaded', async () => {
             submitButtonText.textContent = originalButtonText;
             return;
         }
+
+        // Langsung kirim 'newItem' karena formatnya sudah cocok dengan yang diharapkan Google Sheet
         const isSynced = await sendDataToGoogleSheet(newItem);
+
         pesanan.push(newItem);
         saveDraft(pesanan);
         elements.form.reset();
         toggleFormOptions();
         updateLivePriceDisplay();
+
         if (isSynced) {
             await showModal({ title: 'Berhasil!', message: 'Pesanan berhasil ditambahkan dan disinkronkan ke Google Sheet.' });
         } else {
