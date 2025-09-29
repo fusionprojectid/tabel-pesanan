@@ -3,7 +3,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // STEP 1: DEKLARASI VARIABEL GLOBAL, KONSTANTA, & STATE
     let HARGA_BARANG = {};
-    const GOOGLE_SHEET_URL = 'https://script.google.com/macros/s/AKfycbymCh-kJNolKVvD9R2XNUabVF-J2x_uwmhwVavGfPN7RHy4wTqlKSbPY2RkhCvAs2Hb/exec';
+    const GOOGLE_SHEET_URL = 'https://script.google.com/macros/s/AKfycbwyZBFrO7zaSc3MYeq3Km64nc_qojZQjXEurVCfVwrSpZC1ZdqoIDatuEjpDfrRMBeh/exec';
     const BARANG_PAKAI_UKURAN = ['Kaos', 'Kaos Polo', 'Jaket Hoodie', 'Jaket Gunung', 'PDL', 'Kaos Kaki'];
     let currentSort = { column: 'nama', order: 'asc' };
     let currentFilter = 'Semua';
@@ -104,7 +104,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     };
     const formatRupiah = (angka) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(angka);
     const loadDataFromSheet = async () => {
-        const loadingModalPromise = showModal({ title: 'Sinkronisasi Data', message: 'Sedang memuat data terbaru dari Google Sheet...' });
+        const loadingModalPromise = showModal({ title: 'Sinkronisasi Data', message: 'Sedang memuat data terbaru...' });
         try {
             const ordersResponse = await fetch(`${GOOGLE_SHEET_URL}?action=getOrders`);
             if (!ordersResponse.ok) throw new Error('Gagal mengambil data pesanan.');
@@ -128,7 +128,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             console.error('Sinkronisasi gagal:', error);
             await showModal({
                 title: 'Koneksi Gagal',
-                message: 'Tidak dapat mengambil data terbaru dari Google Sheet. Menampilkan data yang tersimpan di perangkat ini (jika ada).',
+                message: 'Tidak dapat mengambil data terbaru dari server. Menampilkan data yang tersimpan di perangkat ini (jika ada).',
             });
             if (Object.keys(HARGA_BARANG).length === 0) {
                 await loadPricesFromFile();
@@ -288,7 +288,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     };
     const sendDataToGoogleSheet = async (data) => {
         const formData = new FormData();
-        // PERBAIKAN 1: Mengubah 'addItem' menjadi 'addOrder' agar cocok dengan Google Sheet
         formData.append('action', 'addOrder');
         
         for (const key in data) {
@@ -321,7 +320,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (elements.opsiTipeLengan.style.display !== 'none' && elements.tipeLenganSelect.value) detailArray.push(elements.tipeLenganSelect.value);
         if (elements.opsiUkuran.style.display !== 'none' && elements.ukuranSelect.value) detailArray.push(elements.ukuranSelect.value);
 
-        // PERBAIKAN 2: Objek ini sekarang memiliki key sederhana (nama, id) yang cocok dengan Google Sheet
         const newItem = {
             id: Date.now(),
             timestamp: new Date().toISOString(),
@@ -345,7 +343,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             return;
         }
 
-        // Langsung kirim 'newItem' karena formatnya sudah cocok dengan yang diharapkan Google Sheet
         const isSynced = await sendDataToGoogleSheet(newItem);
 
         pesanan.push(newItem);
@@ -355,9 +352,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         updateLivePriceDisplay();
 
         if (isSynced) {
-            await showModal({ title: 'Berhasil!', message: 'Pesanan berhasil ditambahkan dan disinkronkan ke Google Sheet.' });
+            await showModal({ title: 'Berhasil!', message: 'Pesanan berhasil ditambahkan dan disinkronkan.' });
         } else {
-            await showModal({ title: 'Peringatan', message: 'Gagal sinkronisasi ke Google Sheet. Data hanya tersimpan di perangkat ini.' });
+            await showModal({ title: 'Peringatan', message: 'Gagal melakukan sinkronisasi. Data hanya tersimpan di perangkat ini.' });
         }
         setActiveView('rekap');
         submitButton.disabled = false;
@@ -400,9 +397,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (isSynced) {
             saveDraft(loadDraft().filter(item => item.id != id));
             renderHasil();
-            showModal({ title: 'Berhasil', message: 'Item telah dihapus dari web dan Google Sheet.' });
+            showModal({ title: 'Berhasil', message: 'Item telah dihapus.' });
         } else {
-            showModal({ title: 'Gagal Sinkronisasi', message: 'Gagal menghapus item dari Google Sheet. Periksa koneksi dan coba lagi.' });
+            showModal({ title: 'Gagal Sinkronisasi', message: 'Gagal menghapus item dari server. Periksa koneksi dan coba lagi.' });
         }
     };
     const deleteGroup = async (nama) => {
@@ -416,9 +413,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         if(isSynced) {
             saveDraft(loadDraft().filter(item => item.nama !== nama));
             renderHasil();
-            showModal({ title: 'Berhasil', message: `Semua pesanan a/n ${nama} telah dihapus dari web dan Google Sheet.`});
+            showModal({ title: 'Berhasil', message: `Semua pesanan a/n ${nama} telah dihapus.`});
         } else {
-            showModal({ title: 'Gagal Sinkronisasi', message: 'Gagal menghapus grup dari Google Sheet. Periksa koneksi dan coba lagi.' });
+            showModal({ title: 'Gagal Sinkronisasi', message: 'Gagal menghapus grup dari server. Periksa koneksi dan coba lagi.' });
         }
     };
     const syncActionToSheet = async (action, payload) => {
@@ -712,10 +709,25 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (strukBtn) cetakStruk(strukBtn.dataset.nama);
         if (deleteGroupBtn) await deleteGroup(deleteGroupBtn.dataset.nama);
     });
+    
     elements.clearBtn.addEventListener('click', async () => {
-        if (await showModal({ title: 'Reset Semua Data', message: 'YAKIN ingin mengosongkan <b>SEMUA</b> data pesanan?', type: 'confirm', confirmText: 'Ya, Kosongkan' })) {
-            saveDraft([]);
-            renderHasil();
+        const confirmed = await showModal({
+            title: 'Reset Semua Data',
+            message: 'YAKIN ingin mengosongkan <b>SEMUA</b> data pesanan dari aplikasi dan server secara permanen?',
+            type: 'confirm',
+            confirmText: 'Ya, Kosongkan Semua'
+        });
+
+        if (confirmed) {
+            const isSynced = await syncActionToSheet('clearAll', {});
+            
+            if (isSynced) {
+                saveDraft([]);
+                renderHasil();
+                await showModal({ title: 'Berhasil', message: 'Semua data pesanan telah dikosongkan.' });
+            } else {
+                await showModal({ title: 'Gagal Sinkronisasi', message: 'Gagal mengosongkan data di server. Tidak ada data yang dihapus.' });
+            }
         }
     });
     
