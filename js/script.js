@@ -330,6 +330,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 if (elements.bahanPoloSelect.value) detailArray.push(elements.bahanPoloSelect.value);
             }
         } else if (selectedBarang === 'Topi') {
+            finalBarangName = 'Topi';
             if (elements.bahanTopiSelect.value) detailArray.push(elements.bahanTopiSelect.value);
         }
 
@@ -395,7 +396,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 basePrice = HARGA_BARANG[`Kaos Polo, ${bahanPolo}`] || 0;
             }
         } else if (barang === 'Topi') {
-            basePrice = HARGA_BARANG[bahanTopi] || 0;
+            basePrice = HARGA_BARANG[`Topi, ${bahanTopi}`] || 0;
         } else {
             basePrice = HARGA_BARANG[barang] || 0;
         }
