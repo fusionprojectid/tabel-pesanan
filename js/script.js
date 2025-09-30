@@ -3,7 +3,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // STEP 1: DEKLARASI VARIABEL GLOBAL, KONSTANTA, & STATE
     let HARGA_BARANG = {};
-    const GOOGLE_SHEET_URL = 'https://script.google.com/macros/s/AKfycbwyZBFrO7zaSc3MYeq3Km64nc_qojZQjXEurVCfVwrSpZC1ZdqoIDatuEjpDfrRMBeh/exec';
+    const GOOGLE_SHEET_URL = 'https://script.google.com/macros/s/AKfycby1MpbtlWvBaF10XTtVbnG25PDDUIX57XlcghmaSWD7b2rsnfhH7HzivDC6PhDLhwc/exec';
     const BARANG_PAKAI_UKURAN = ['Kaos', 'Jaket', 'PDL', 'Kaos Kaki'];
     let currentSort = { column: 'nama', order: 'asc' };
     let currentFilter = 'Semua';
@@ -842,3 +842,4 @@ document.addEventListener('DOMContentLoaded', async () => {
     initializeApp();
 
 });
+
