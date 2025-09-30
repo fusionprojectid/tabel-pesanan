@@ -73,7 +73,7 @@
             <div class="flex-grow text-center">
                 <h1 class="text-2xl sm:text-3xl font-bold text-[--brand-dark]">Formulir Pesanan</h1>
                 <p id="live-date" class="text-sm font-semibold text-text-secondary"></p>
-                <p class="text-xs text-[#d3d3d3] mt-1">-- Aplikasi v4.6.0 --</p>
+                <p class="text-xs text-[#d3d3d3] mt-1">-- Aplikasi v4.7.0 --</p>
             </div>
             <div class="w-10"></div> </div>
 
@@ -98,12 +98,16 @@
                         <label for="barang" class="block text-sm font-medium text-text-secondary">Jenis Barang</label>
                         <select id="barang" class="mt-1 block w-full py-2 px-3 border border-[--border-primary] bg-inherit rounded-md shadow-sm focus:outline-none focus:ring-brand-primary focus:border-brand-primary sm:text-sm bg-[--bg-secondary] text-[--text-primary]" required>
                             <option disabled selected value="">-- Pilih Jenis Barang --</option>
+                            <option>Bantal</option>
                             <option>Block Note</option>
+                            <option>Dril</option>
                             <option>Gantungan Kunci</option>
+                            <option>Handuk</option>
                             <option>Jaket</option>
                             <option>Kaos</option>
                             <option>Kaos Kaki</option>
                             <option>Lanyard</option>
+                            <option>Mug</option>
                             <option>PDL</option>
                             <option>Pin (4.4mm)</option>
                             <option>Pulpen</option>
@@ -178,6 +182,9 @@
                     <div id="live-price-display" class="pt-2 text-right hidden">
                         <p class="text-sm text-text-secondary">Harga Satuan: 
                             <span id="harga-satuan-display" class="font-bold text-lg text-[--brand-dark]">Rp0</span>
+                        </p>
+                        <p class="text-sm text-text-secondary mt-1">Harga Total: 
+                            <span id="harga-total-display" class="font-bold text-lg text-[--brand-dark]">Rp0</span>
                         </p>
                     </div>
                     <div class="pt-4 flex justify-end">
