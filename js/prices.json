@@ -1,7 +1,6 @@
 {
   "Bantal": 65000,
   "Block Note": 8000,
-  "Dril": 45000,
   "Gantungan Kunci": 8000,
   "Handuk": 55000,
   "Jaket Bomber": 185000,
@@ -25,7 +24,8 @@
   "Pin Kecil, 3.4mm": 5000,
   "Pin Standard, 4.4mm": 5000,
   "Pulpen": 8000,
-  "Rafael A": 55000,
-  "Rafael B": 50000,
+  "Topi, Dril": 45000,
+  "Topi, Rafael A": 55000,
+  "Topi, Rafael B": 50000,
   "Totebag": 5000
 }
