@@ -4,7 +4,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     // STEP 1: DEKLARASI VARIABEL GLOBAL, KONSTANTA, & STATE
     let HARGA_BARANG = {};
     const GOOGLE_SHEET_URL = 'https://script.google.com/macros/s/AKfycbwyZBFrO7zaSc3MYeq3Km64nc_qojZQjXEurVCfVwrSpZC1ZdqoIDatuEjpDfrRMBeh/exec';
-    const BARANG_PAKAI_UKURAN = ['Kaos', 'Kaos Polo', 'Jaket Hoodie', 'Jaket Gunung', 'PDL', 'Kaos Kaki'];
+    const BARANG_PAKAI_UKURAN = ['Kaos', 'Jaket', 'PDL', 'Kaos Kaki'];
     let currentSort = { column: 'nama', order: 'asc' };
     let currentFilter = 'Semua';
     let chartBarangInstance = null;
@@ -24,10 +24,14 @@ document.addEventListener('DOMContentLoaded', async () => {
         jumlahInput: document.getElementById('jumlah'),
         bahanPoloSelect: document.getElementById('bahan-polo'),
         bahanTopiSelect: document.getElementById('bahan-topi'),
+        tipeJaketSelect: document.getElementById('tipe-jaket'),
+        tipeKaosSelect: document.getElementById('tipe-kaos'),
         tipeLenganSelect: document.getElementById('tipe-lengan'),
         ukuranSelect: document.getElementById('ukuran'),
         opsiBahanPolo: document.getElementById('opsi-bahan-polo'),
         opsiBahanTopi: document.getElementById('opsi-bahan-topi'),
+        opsiTipeJaket: document.getElementById('opsi-tipe-jaket'),
+        opsiTipeKaos: document.getElementById('opsi-tipe-kaos'),
         opsiTipeLengan: document.getElementById('opsi-tipe-lengan'),
         opsiUkuran: document.getElementById('opsi-ukuran'),
         tabelHasil: document.getElementById('tabel-hasil'),
@@ -207,7 +211,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (typeof valA === 'string') {
                 return currentSort.order === 'asc' ? valA.localeCompare(valB) : valB.localeCompare(valA);
             }
-            return currentSort.order === 'asc' ? valA - valB : valB - valA;
+            return currentSort.order === 'asc' ? valA - valB : valB - a;
         });
         updateSortIndicators();
         elements.tabelHasil.innerHTML = '';
@@ -222,12 +226,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         filteredPesanan.forEach(item => {
             grandTotal += item.hargaSatuan * item.jumlah;
             let namaBarangRekap = item.barang;
-            const detailSplit = item.detail ? item.detail.split(',')[0] : '';
-            if (item.barang === 'Kaos Polo' && detailSplit) {
-                namaBarangRekap = `Kaos Polo - ${detailSplit}`;
-            } else if (item.barang === 'Topi' && detailSplit) {
-                namaBarangRekap = `Topi - ${detailSplit}`;
-            }
             rekapBarang[namaBarangRekap] = (rekapBarang[namaBarangRekap] || 0) + item.jumlah;
         });
         elements.grandTotalEl.textContent = formatRupiah(grandTotal);
@@ -315,23 +313,41 @@ document.addEventListener('DOMContentLoaded', async () => {
         const pesanan = loadDraft();
         const detailArray = [];
         const selectedBarang = elements.barangSelect.value;
-        if (selectedBarang === 'Kaos Polo' && elements.bahanPoloSelect.value) detailArray.push(elements.bahanPoloSelect.value);
-        if (selectedBarang === 'Topi' && elements.bahanTopiSelect.value) detailArray.push(elements.bahanTopiSelect.value);
-        if (elements.opsiTipeLengan.style.display !== 'none' && elements.tipeLenganSelect.value) detailArray.push(elements.tipeLenganSelect.value);
-        if (elements.opsiUkuran.style.display !== 'none' && elements.ukuranSelect.value) detailArray.push(elements.ukuranSelect.value);
+        let finalBarangName = selectedBarang;
+        const katunTypes = ['O Neck', 'V Neck', 'Raglan', 'Oversize'];
+
+        if (selectedBarang === 'Jaket') {
+            const tipeJaket = elements.tipeJaketSelect.value;
+            finalBarangName = `Jaket ${tipeJaket}`;
+        } else if (selectedBarang === 'Kaos') {
+            const tipeKaos = elements.tipeKaosSelect.value;
+            if (katunTypes.includes(tipeKaos)) {
+                finalBarangName = `Kaos ${tipeKaos}`;
+                if (elements.tipeLenganSelect.value) detailArray.push(elements.tipeLenganSelect.value);
+            } else if (tipeKaos === 'Polo') {
+                finalBarangName = 'Kaos Polo';
+                if (elements.bahanPoloSelect.value) detailArray.push(elements.bahanPoloSelect.value);
+            }
+        } else if (selectedBarang === 'Topi') {
+            if (elements.bahanTopiSelect.value) detailArray.push(elements.bahanTopiSelect.value);
+        }
+
+        if (elements.opsiUkuran.style.display !== 'none' && elements.ukuranSelect.value) {
+            detailArray.push(elements.ukuranSelect.value);
+        }
 
         const newItem = {
             id: Date.now(),
             timestamp: new Date().toISOString(),
             nama: elements.namaInput.value.trim(),
-            barang: selectedBarang,
+            barang: finalBarangName,
             detail: detailArray.join(', '),
             jumlah: parseInt(elements.jumlahInput.value),
             hargaSatuan: calculatePrice()
         };
 
-        if (!newItem.nama || !newItem.barang || newItem.jumlah <= 0) {
-             await showModal({ title: 'Input Tidak Lengkap', message: 'Nama, jenis barang, dan jumlah harus diisi.' });
+        if (!newItem.nama || !newItem.barang || newItem.jumlah <= 0 || newItem.barang.includes("null") || newItem.barang.includes("undefined")) {
+             await showModal({ title: 'Input Tidak Lengkap', message: 'Nama, jenis barang, dan semua detail yang relevan harus diisi.' });
              submitButton.disabled = false;
              submitButtonText.textContent = originalButtonText;
              return;
@@ -344,7 +360,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
 
         const isSynced = await sendDataToGoogleSheet(newItem);
-
         pesanan.push(newItem);
         saveDraft(pesanan);
         elements.form.reset();
@@ -362,14 +377,29 @@ document.addEventListener('DOMContentLoaded', async () => {
     };
     const calculatePrice = () => {
         const barang = elements.barangSelect.value;
+        const tipeJaket = elements.tipeJaketSelect.value;
+        const tipeKaos = elements.tipeKaosSelect.value;
         const bahanPolo = elements.bahanPoloSelect.value;
         const bahanTopi = elements.bahanTopiSelect.value;
         const ukuran = elements.ukuranSelect.value;
+        const katunTypes = ['O Neck', 'V Neck', 'Raglan', 'Oversize'];
         let basePrice = 0;
-        if (barang === 'Kaos Polo') basePrice = HARGA_BARANG[bahanPolo] || 0;
-        else if (barang === 'Topi') basePrice = HARGA_BARANG[bahanTopi] || 0;
-        else basePrice = HARGA_BARANG[barang] || 0;
-        if (BARANG_PAKAI_UKURAN.includes(barang) && ['XXL', 'XXXL'].includes(ukuran)) {
+
+        if (barang === 'Jaket') {
+            basePrice = HARGA_BARANG[`Jaket ${tipeJaket}`] || 0;
+        } else if (barang === 'Kaos') {
+            if (katunTypes.includes(tipeKaos)) {
+                basePrice = HARGA_BARANG[`Kaos ${tipeKaos}`] || 0;
+            } else if (tipeKaos === 'Polo') {
+                basePrice = HARGA_BARANG[bahanPolo] || 0;
+            }
+        } else if (barang === 'Topi') {
+            basePrice = HARGA_BARANG[bahanTopi] || 0;
+        } else {
+            basePrice = HARGA_BARANG[barang] || 0;
+        }
+        
+        if (elements.opsiUkuran.style.display === 'block' && ['XXL', 'XXXL'].includes(ukuran)) {
             basePrice += 10000;
         }
         return basePrice;
@@ -381,10 +411,33 @@ document.addEventListener('DOMContentLoaded', async () => {
     };
     const toggleFormOptions = () => {
         const selectedBarang = elements.barangSelect.value;
-        elements.opsiBahanPolo.style.display = selectedBarang === 'Kaos Polo' ? 'block' : 'none';
-        elements.opsiBahanTopi.style.display = selectedBarang === 'Topi' ? 'block' : 'none';
-        elements.opsiUkuran.style.display = BARANG_PAKAI_UKURAN.includes(selectedBarang) ? 'block' : 'none';
-        elements.opsiTipeLengan.style.display = selectedBarang === 'Kaos' ? 'block' : 'none';
+        const selectedTipeKaos = elements.tipeKaosSelect.value;
+        const katunTypes = ['O Neck', 'V Neck', 'Raglan', 'Oversize'];
+
+        elements.opsiTipeJaket.style.display = 'none';
+        elements.opsiBahanTopi.style.display = 'none';
+        elements.opsiTipeKaos.style.display = 'none';
+        elements.opsiBahanPolo.style.display = 'none';
+        elements.opsiTipeLengan.style.display = 'none';
+        elements.opsiUkuran.style.display = 'none';
+
+        if (selectedBarang === 'Jaket') {
+            elements.opsiTipeJaket.style.display = 'block';
+            elements.opsiUkuran.style.display = 'block';
+        } else if (selectedBarang === 'Topi') {
+            elements.opsiBahanTopi.style.display = 'block';
+        } else if (selectedBarang === 'Kaos') {
+            elements.opsiTipeKaos.style.display = 'block';
+            if (katunTypes.includes(selectedTipeKaos)) {
+                elements.opsiTipeLengan.style.display = 'block';
+                elements.opsiUkuran.style.display = 'block';
+            } else if (selectedTipeKaos === 'Polo') {
+                elements.opsiBahanPolo.style.display = 'block';
+                elements.opsiUkuran.style.display = 'block';
+            }
+        } else if (BARANG_PAKAI_UKURAN.includes(selectedBarang)) {
+            elements.opsiUkuran.style.display = 'block';
+        }
     };
     const deleteItem = async (id) => {
         const confirmed = await showModal({ title: 'Konfirmasi Hapus', message: 'Hapus item ini dari pesanan?', type: 'confirm', confirmText: 'Ya, Hapus' });
@@ -442,7 +495,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (!item) return;
         const jumlahBaruStr = await showModal({ title: 'Ubah Jumlah', message: 'Masukkan jumlah pesanan baru:', type: 'prompt', defaultValue: item.jumlah.toString(), confirmText: 'Simpan' });
         if (jumlahBaruStr && !isNaN(jumlahBaruStr) && parseInt(jumlahBaruStr) > 0) {
-            // Logika untuk sinkronisasi edit akan ditambahkan di langkah selanjutnya
             item.jumlah = parseInt(jumlahBaruStr);
             saveDraft(pesanan);
             renderHasil();
@@ -620,8 +672,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
         return Promise.resolve();
     };
-
-    // --- PERUBAHAN 2: Fungsi cetakStruk dimodifikasi untuk menambahkan logo ---
     const cetakStruk = (nama) => {
         const pesanan = loadDraft().filter(p => p.nama === nama);
         if (pesanan.length === 0) return;
@@ -630,27 +680,23 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         const logoImg = document.getElementById('logo-struk');
         
-        // Posisi y (vertikal) awal untuk konten, akan disesuaikan setelah logo ditambahkan
         let y = 10;
 
-        // --- PERUBAHAN UNTUK LOGO PROPORSIONAL ---
         if (logoImg && logoImg.complete && logoImg.naturalHeight > 0) {
             try {
-                const maxWidth = 30; // Tentukan lebar maksimal logo (misal: 30mm)
+                const maxWidth = 30;
                 const aspectRatio = logoImg.naturalHeight / logoImg.naturalWidth;
-                const proportionalHeight = maxWidth * aspectRatio; // Hitung tinggi proporsional
-                const xPosition = (80 - maxWidth) / 2; // Hitung posisi x agar logo di tengah
+                const proportionalHeight = maxWidth * aspectRatio;
+                const xPosition = (80 - maxWidth) / 2;
 
                 doc.addImage(logoImg, 'PNG', xPosition, y, maxWidth, proportionalHeight);
                 
-                // Atur posisi y untuk teks agar berada di bawah logo + sedikit margin
                 y += proportionalHeight + 7;
 
             } catch (e) {
                 console.error("Gagal memuat gambar logo untuk struk:", e);
             }
         }
-        // --- AKHIR PERUBAHAN ---
         
         doc.setFontSize(12).setFont('helvetica', 'bold');
         doc.text('TRITUNGGAL LANCAR', 40, y, { align: 'center' });
@@ -701,8 +747,18 @@ document.addEventListener('DOMContentLoaded', async () => {
     elements.sidebarOverlay.addEventListener('click', toggleSidebar);
     
     elements.form.addEventListener('submit', tambahPesanan);
-    elements.barangSelect.addEventListener('change', () => { toggleFormOptions(); updateLivePriceDisplay(); });
-    ['bahanPoloSelect', 'bahanTopiSelect', 'ukuranSelect', 'tipeLenganSelect'].forEach(id => {
+    elements.barangSelect.addEventListener('change', () => {
+        elements.tipeKaosSelect.value = '';
+        elements.tipeJaketSelect.value = '';
+        toggleFormOptions();
+        updateLivePriceDisplay();
+    });
+    elements.tipeKaosSelect.addEventListener('change', () => {
+        elements.bahanPoloSelect.value = '';
+        toggleFormOptions();
+        updateLivePriceDisplay();
+    });
+    ['bahanPoloSelect', 'bahanTopiSelect', 'tipeJaketSelect', 'ukuranSelect', 'tipeLenganSelect'].forEach(id => {
         elements[id]?.addEventListener('change', updateLivePriceDisplay);
     });
     
