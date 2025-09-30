@@ -54,6 +54,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         emailBtn: document.getElementById("email-btn"),
         livePriceDisplay: document.getElementById('live-price-display'),
         hargaSatuanDisplay: document.getElementById('harga-satuan-display'),
+        hargaTotalDisplay: document.getElementById('harga-total-display'),
         themeToggleBtnSidebar: document.getElementById('theme-toggle-sidebar'),
         themeToggleDarkIconSidebar: document.getElementById('theme-toggle-dark-icon-sidebar'),
         themeToggleLightIconSidebar: document.getElementById('theme-toggle-light-icon-sidebar'),
@@ -391,7 +392,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (katunTypes.includes(tipeKaos)) {
                 basePrice = HARGA_BARANG[`Kaos ${tipeKaos}`] || 0;
             } else if (tipeKaos === 'Polo') {
-                basePrice = HARGA_BARANG[bahanPolo] || 0;
+                basePrice = HARGA_BARANG[`Kaos Polo, ${bahanPolo}`] || 0;
             }
         } else if (barang === 'Topi') {
             basePrice = HARGA_BARANG[bahanTopi] || 0;
@@ -406,8 +407,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     };
     const updateLivePriceDisplay = () => {
         const price = calculatePrice();
+        const quantity = parseInt(elements.jumlahInput.value) || 0;
+        const total = price * quantity;
+        
         elements.hargaSatuanDisplay.textContent = formatRupiah(price > 0 ? price : 0);
-        elements.livePriceDisplay.classList.toggle('hidden', price <= 0);
+        elements.hargaTotalDisplay.textContent = formatRupiah(total > 0 ? total : 0);
+        
+        elements.livePriceDisplay.classList.toggle('hidden', price <= 0 || quantity <= 0);
     };
     const toggleFormOptions = () => {
         const selectedBarang = elements.barangSelect.value;
@@ -747,6 +753,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     elements.sidebarOverlay.addEventListener('click', toggleSidebar);
     
     elements.form.addEventListener('submit', tambahPesanan);
+    elements.jumlahInput.addEventListener('input', updateLivePriceDisplay);
+
     elements.barangSelect.addEventListener('change', () => {
         elements.tipeKaosSelect.value = '';
         elements.tipeJaketSelect.value = '';
